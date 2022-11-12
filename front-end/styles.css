@@ -86,3 +86,25 @@ button:focus-visible {
   outline: none;
   transform: rotate(15deg);
 }
+
+.results {
+  font-size: 2em;
+  width: 100%;
+}
+
+.results-row {
+  display: flex;
+  margin: 2rem 0;
+}
+
+.results-bar {
+  background: var(--white);
+  margin: 0 1rem;
+  padding: 0.25rem;
+  transition: width 250ms ease-in-out;
+  width: 0;
+}
+
+.hidden {
+  display: none;
+}
