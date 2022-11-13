@@ -37,3 +37,17 @@ Check formatting by running:
 ```sh
 prettier . --check
 ```
+
+## Run acceptance tests
+
+To execute acceptance tests with docker-compose, run:
+
+```sh
+docker-compose -f docker-compose.test.yml up --exit-code-from test
+```
+
+Note that tests except empty database. To clean up test database volume after execution, run:
+
+```sh
+docker-compose -f docker-compose.test.yml down -v
+```

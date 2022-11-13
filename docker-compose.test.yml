@@ -17,3 +17,13 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: pass
       POSTGRES_DB: feedback
+  test:
+    build: ./test/
+    command:
+      - -v
+      - URL:http://localhost:8081
+      - -d
+      - /out
+    network_mode: host
+    volumes:
+      - ${PWD}/out:/out
