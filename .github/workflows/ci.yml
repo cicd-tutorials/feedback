@@ -2,65 +2,65 @@ name: CI
 on:
   push:
     branches:
-    - main
+      - main
   pull_request:
     branches:
-    - main
+      - main
 
 jobs:
   prettier:
     name: Check formatting with prettier
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v2
-      with:
-        node-version: "18"
-    - name: Check formatting
-      run: |
-        npm i -g prettier
-        prettier . --check
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+      - name: Check formatting
+        run: |
+          npm i -g prettier
+          prettier . --check
   pycodestyle:
     name: Check formatting with pycodestyle
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-python@v2
-      with:
-        python-version: "3.11"
-    - name: Check formatting
-      run: |
-        pip install pycodestyle
-        pycodestyle .
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.11"
+      - name: Check formatting
+        run: |
+          pip install pycodestyle
+          pycodestyle .
   containers:
     name: Build, test, and push container images
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Test container images
-      run: |
-        docker-compose -f docker-compose.test.yml up --exit-code-from test
-    - name: Store logs
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: acceptance-test-logs
-        path: out/
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Push container image to GitHub Container Registry
-      if: github.ref == 'refs/heads/main'
-      run: |
-        docker build back-end/ -t back-end
-        docker build front-end/ -t front-end
-        for tag in ${{ github.run_number }} latest; do
-          docker tag back-end ghcr.io/kangasta/three-tier-example-app-api:$tag
-          docker push ghcr.io/kangasta/three-tier-example-app-api:$tag
-          docker tag front-end ghcr.io/kangasta/three-tier-example-app-ui:$tag
-          docker push ghcr.io/kangasta/three-tier-example-app-ui:$tag
-        done
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Test container images
+        run: |
+          docker-compose -f docker-compose.test.yml up --exit-code-from test
+      - name: Store logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: acceptance-test-logs
+          path: out/
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push container image to GitHub Container Registry
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker build back-end/ -t back-end
+          docker build front-end/ -t front-end
+          for tag in ${{ github.run_number }} latest; do
+            docker tag back-end ghcr.io/kangasta/three-tier-example-app-api:$tag
+            docker push ghcr.io/kangasta/three-tier-example-app-api:$tag
+            docker tag front-end ghcr.io/kangasta/three-tier-example-app-ui:$tag
+            docker push ghcr.io/kangasta/three-tier-example-app-ui:$tag
+          done
