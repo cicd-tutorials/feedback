@@ -417,10 +417,7 @@ services:
     ports:
       - 5000:8000
   ui:
-    build:
-      context: ./front-end/
-      args:
-        REACT_APP_API_URL: /api
+    build: ./front-end/
     ports:
       - 9080:80
   db:
