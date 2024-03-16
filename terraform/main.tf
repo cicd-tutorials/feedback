@@ -8,7 +8,7 @@ provider "kubernetes" {}
 data "kubernetes_nodes" "this" {}
 
 locals {
-  addresses = data.kubernetes_nodes.this.nodes[0].status[0].addresses
+  addresses   = data.kubernetes_nodes.this.nodes[0].status[0].addresses
   external_ip = local.addresses[index(local.addresses.*.type, "ExternalIP")].address
 }
 
@@ -200,7 +200,7 @@ resource "kubernetes_deployment" "db" {
 
 resource "kubernetes_service" "db" {
   metadata {
-    name = "db"
+    name      = "db"
     namespace = var.namespace
   }
   spec {

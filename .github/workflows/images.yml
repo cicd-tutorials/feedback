@@ -1,38 +1,24 @@
-name: CI
+name: Images
 on:
   push:
     branches:
       - main
+    paths:
+      - back-end/**
+      - front-end/**
+      - test/**
+      - docker-compose*
   pull_request:
     branches:
       - main
+    paths:
+      - back-end/**
+      - front-end/**
+      - test/**
+      - docker-compose*
 
 jobs:
-  prettier:
-    name: Check formatting with prettier
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v2
-        with:
-          node-version: "18"
-      - name: Check formatting
-        run: |
-          npm i -g prettier
-          prettier . --check
-  pycodestyle:
-    name: Check formatting with pycodestyle
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v2
-        with:
-          python-version: "3.11"
-      - name: Check formatting
-        run: |
-          pip install pycodestyle
-          pycodestyle .
-  containers:
+  images:
     name: Build, test, and push container images
     runs-on: ubuntu-latest
     steps:
