@@ -13,3 +13,5 @@ Apply the configuration:
 ```sh
 terraform apply
 ```
+
+The configuration defines the URL of the user interface as an output named `ui_url`. Open the URL with your browser to use the application.
