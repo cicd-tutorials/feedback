@@ -1,0 +1,29 @@
+name: Back-end
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - back-end/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - back-end/**
+
+jobs:
+  images:
+    name: Build and test image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Test back-end image
+        run: |
+          docker build back-end/ -t back-end
+          docker run -d -p 5000:8000 --name server back-end
+          ./back-end/test.sh
+      - name: Teardown back-end image test
+        if: always()
+        run: |
+          docker rm -f server
