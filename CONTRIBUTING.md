@@ -43,11 +43,11 @@ prettier . --check
 To execute acceptance tests with docker-compose, run:
 
 ```sh
-docker-compose -f docker-compose.test.yml up --exit-code-from test
+docker-compose -f docker-compose.test-host-net.yml up --exit-code-from test
 ```
 
 Note that tests except empty database. To clean up test database volume after execution, run:
 
 ```sh
-docker-compose -f docker-compose.test.yml down -v
+docker-compose -f docker-compose.test-host-net.yml down -v
 ```

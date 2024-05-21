@@ -1,0 +1,20 @@
+server {
+    set $api "${PROXY_PASS}";
+
+    listen       80;
+    server_name  localhost;
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+    }
+
+    location /api {
+        if ($api = "") {
+            return 404;
+        }
+
+        rewrite ^/api(.*) /$1 break;
+        proxy_pass $api;
+    }
+}
