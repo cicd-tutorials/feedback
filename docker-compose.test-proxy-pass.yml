@@ -1,26 +1,6 @@
+include:
+  - docker-compose.yml
 services:
-  api:
-    environment:
-      DB_URL: postgresql://user:pass@db:5432/feedback
-    build: ./back-end/
-    command: -w 4 -b 0.0.0.0:8000
-  ui:
-    build: ./front-end/
-    ports:
-      - 8080:80
-    environment:
-      PROXY_PASS: http://api:8000
-    configs:
-      - source: config.js
-        target: /usr/share/nginx/html/config.js
-      - source: resolver.conf
-        target: /etc/nginx/conf.d/resolver.conf
-  db:
-    image: postgres:14
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: feedback
   test:
     build: ./test/
     command:
@@ -30,10 +10,3 @@ services:
       - /out
     volumes:
       - ${PWD}/out:/out
-configs:
-  config.js:
-    content: |
-      const serverUrl = "/api";
-  resolver.conf:
-    content: |
-      resolver 127.0.0.11;
