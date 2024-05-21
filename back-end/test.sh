@@ -2,6 +2,12 @@
 
 base_url=${1:-localhost\:5000}
 
+# Wait until server is online
+for i in $(seq 1 60); do
+    curl $base_url/feedback && break || true
+    sleep 1
+done
+
 len=$(curl -s $base_url/feedback | jq 'length')
 test "$len" -eq 0
 
