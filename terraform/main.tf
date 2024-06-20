@@ -3,7 +3,21 @@ variable "namespace" {
   default = "three-tier-example-app"
 }
 
-provider "kubernetes" {}
+variable "service_type" {
+  type    = string
+  default = "NodePort"
+}
+
+variable "pvc_storage_class" {
+  type    = string
+  default = ""
+}
+
+provider "kubernetes" {
+  ignore_annotations = [
+    "^service\\.beta\\.kubernetes\\.io\\/.*load.*balancer.*"
+  ]
+}
 
 data "kubernetes_nodes" "this" {}
 
@@ -43,7 +57,7 @@ resource "kubernetes_deployment" "api" {
 
       spec {
         container {
-          image = "ghcr.io/kangasta/three-tier-example-app-api:6"
+          image = "ghcr.io/kangasta/three-tier-example-app-api:10"
           name  = "api"
 
           env {
@@ -71,7 +85,7 @@ resource "kubernetes_service" "api" {
       target_port = 8000
     }
 
-    type = "NodePort"
+    type = "ClusterIP"
   }
 }
 
@@ -81,7 +95,8 @@ resource "kubernetes_config_map" "ui" {
     namespace = var.namespace
   }
   data = {
-    config = "const serverUrl = \"http://${local.external_ip}:${kubernetes_service.api.spec[0].port[0].node_port}\";"
+    config   = "const serverUrl = \"/api\";"
+    resolver = "resolver kube-dns.kube-system.svc.cluster.local;"
   }
   depends_on = [kubernetes_service.api]
 }
@@ -111,12 +126,24 @@ resource "kubernetes_deployment" "ui" {
 
       spec {
         container {
-          image = "ghcr.io/kangasta/three-tier-example-app-ui:6"
+          image = "ghcr.io/kangasta/three-tier-example-app-ui:10"
           name  = "ui"
+
+          env {
+            name  = "PROXY_PASS"
+            value = "http://api.${var.namespace}.svc.cluster.local"
+          }
+
           volume_mount {
             name       = "ui"
             mount_path = "/usr/share/nginx/html/config.js"
             sub_path   = "config"
+          }
+
+          volume_mount {
+            name       = "ui"
+            mount_path = "/etc/nginx/conf.d/resolver.conf"
+            sub_path   = "resolver"
           }
         }
 
@@ -146,7 +173,26 @@ resource "kubernetes_service" "ui" {
       target_port = 80
     }
 
-    type = "NodePort"
+    type = var.service_type
+  }
+}
+
+resource "kubernetes_persistent_volume_claim" "db" {
+  count = var.pvc_storage_class != "" ? 1 : 0
+
+  metadata {
+    name      = "db"
+    namespace = var.namespace
+  }
+
+  spec {
+    storage_class_name = "upcloud-block-storage-maxiops"
+    access_modes       = ["ReadWriteOnce"]
+    resources {
+      requests = {
+        storage = "10Gi"
+      }
+    }
   }
 }
 
@@ -192,6 +238,29 @@ resource "kubernetes_deployment" "db" {
             name  = "POSTGRES_DB"
             value = "feedback"
           }
+
+          env {
+            name  = "PGDATA"
+            value = "/var/lib/postgresql/data/pgdata"
+          }
+
+          dynamic "volume_mount" {
+            for_each = kubernetes_persistent_volume_claim.db
+            content {
+              name       = "db-datadir"
+              mount_path = "/var/lib/postgresql/data"
+            }
+          }
+        }
+
+        dynamic "volume" {
+          for_each = kubernetes_persistent_volume_claim.db
+          content {
+            name = "db-datadir"
+            persistent_volume_claim {
+              claim_name = volume.value.metadata[0].name
+            }
+          }
         }
       }
     }
@@ -216,5 +285,5 @@ resource "kubernetes_service" "db" {
 }
 
 output "ui_url" {
-  value = "http://${local.external_ip}:${kubernetes_service.ui.spec[0].port[0].node_port}"
+  value = var.service_type == "LoadBalancer" ? kubernetes_service.ui.status[0].load_balancer[0].ingress[0].hostname : "http://${local.external_ip}:${kubernetes_service.ui.spec[0].port[0].node_port}"
 }
