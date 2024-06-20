@@ -13,6 +13,11 @@ variable "pvc_storage_class" {
   default = ""
 }
 
+variable "app_version" {
+  type    = string
+  default = "latest"
+}
+
 provider "kubernetes" {
   ignore_annotations = [
     "^service\\.beta\\.kubernetes\\.io\\/.*load.*balancer.*"
@@ -57,7 +62,7 @@ resource "kubernetes_deployment" "api" {
 
       spec {
         container {
-          image = "ghcr.io/kangasta/three-tier-example-app-api:10"
+          image = "ghcr.io/kangasta/three-tier-example-app-api:${var.app_version}"
           name  = "api"
 
           env {
@@ -126,7 +131,7 @@ resource "kubernetes_deployment" "ui" {
 
       spec {
         container {
-          image = "ghcr.io/kangasta/three-tier-example-app-ui:10"
+          image = "ghcr.io/kangasta/three-tier-example-app-ui:${var.app_version}"
           name  = "ui"
 
           env {
