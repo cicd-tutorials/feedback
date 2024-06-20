@@ -57,7 +57,7 @@ resource "kubernetes_deployment" "api" {
 
       spec {
         container {
-          image = "ghcr.io/kangasta/three-tier-example-app-api:9"
+          image = "ghcr.io/kangasta/three-tier-example-app-api:10"
           name  = "api"
 
           env {
@@ -126,7 +126,7 @@ resource "kubernetes_deployment" "ui" {
 
       spec {
         container {
-          image = "ghcr.io/kangasta/three-tier-example-app-ui:9"
+          image = "ghcr.io/kangasta/three-tier-example-app-ui:10"
           name  = "ui"
 
           env {
