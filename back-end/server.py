@@ -11,27 +11,71 @@ from sqlalchemy import func
 
 app = Flask(__name__)
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = getenv('DB_URL', 'sqlite:///server.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = getenv('FEEDBACK_DB_URL', 'sqlite:///server.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
 @dataclass
-class FeedbackItem(db.Model):
-    id: str
+class FeedbackQuestion(db.Model):
+    key: str
+    text: str
     type: str
-    timestamp: datetime
+    with_comment: bool
+
+    key = db.Column(db.String(64), primary_key=True)
+    text = db.Column(db.String(512))
+    type = db.Column(db.String(16))
+    with_comment = db.Column(db.Boolean())
+
+    @property
+    def json(self):
+        return dict(
+            key=self.key,
+            text=self.text,
+            type=self.type,
+            with_comment=self.with_comment,
+        )
+
+
+def _timestamp(input: datetime | None) -> str | None:
+    if input is None:
+        return None
+    return f'{input.isoformat()}Z'
+
+
+@dataclass
+class FeedbackAnswer(db.Model):
+    id: str
+    key: str
+    value: int
+    comment: str
+    group: str
+    created_at: datetime
+    updated_at: datetime
+    submitted_at: datetime
 
     id = db.Column(db.String(36), primary_key=True)
-    type = db.Column(db.String(8))
-    timestamp = db.Column(db.DateTime())
+    key = db.Column(db.String(64))
+    value = db.Column(db.Integer())
+    comment = db.Column(db.String(512))
+    group = db.Column(db.String(32))
+    created_at = db.Column(db.DateTime())
+    updated_at = db.Column(db.DateTime())
+    submitted_at = db.Column(db.DateTime())
 
     @property
     def json(self):
         return dict(
             id=self.id,
-            type=self.type,
-            timestamp=f'{self.timestamp.isoformat()}Z')
+            key=self.key,
+            value=self.value,
+            comment=self.comment,
+            group=self.group,
+            created_at=_timestamp(self.created_at),
+            updated_at=_timestamp(self.updated_at),
+            submitted_at=_timestamp(self.submitted_at),
+        )
 
 
 # Create table if it does not exist
@@ -39,50 +83,96 @@ for _ in range(5):
     try:
         with app.app_context():
             db.create_all()
+
+            # TODO: Check if the table is empty
+            db.session.add(FeedbackQuestion(
+                key="how-are-you-feeling",
+                text="How are you feeling?",
+                type="thumbs",
+                with_comment=False,
+            ))
+            db.session.commit()
     except BaseException:
         sleep(2)
 
 
-def get_feedback():
-    rows = db.session.execute(db.select(FeedbackItem)).all()
-    return jsonify([row.FeedbackItem.json for row in rows])
+def get_feedback(key: str):
+    q = db.session.query(FeedbackQuestion).filter(FeedbackQuestion.key == key).one_or_none()
+    if q is None:
+        return dict(error="Question not found"), 404
+    return jsonify(q.json), 200
 
 
-def post_feedback(input):
+def get_answers(key: str):
+    q = db.session.query(FeedbackQuestion).filter(FeedbackQuestion.key == key).one_or_none()
+    if q is None:
+        return dict(error="Question not found"), 404
+
+    rows = db.session.execute(db.select(FeedbackAnswer).where(FeedbackAnswer.key == key)).all()
+    return jsonify([row.FeedbackAnswer.json for row in rows]), 200
+
+
+def post_answer(key: str, input):
+    q = db.session.query(FeedbackQuestion).filter(FeedbackQuestion.key == key).one_or_none()
+    if q is None:
+        return dict(error="Question not found"), 404
+
     id_ = str(uuid4())
 
-    db.session.add(FeedbackItem(
+    submitted_at = None
+    if input.get("submit") == True:
+        submitted_at = datetime.utcnow()
+
+    # TODO: validate input
+    db.session.add(FeedbackAnswer(
         id=id_,
-        type=input["type"],
-        timestamp=datetime.utcnow()
+        key=key,
+        value=input.get("value"),
+        created_at=datetime.utcnow(),
+        submitted_at=submitted_at,
     ))
     db.session.commit()
 
-    return dict(id=id_)
+    return dict(id=id_), 200
 
 
-def get_feedback_summary():
+def get_feedback_summary(key: str):
+    q = db.session.query(FeedbackQuestion).filter(FeedbackQuestion.key == key).one_or_none()
+    if q is None:
+        return dict(error="Question not found"), 404
+
     rows = db.session.execute(
         db.select(
             func.count(
-                FeedbackItem.id),
-            FeedbackItem.type).group_by(
-            FeedbackItem.type)).all()
+                FeedbackAnswer.id),
+            FeedbackAnswer.value).where(FeedbackAnswer.key == key).group_by(
+            FeedbackAnswer.value)).all()
 
-    data = dict(positive=0, negative=0)
-    for count, type_ in rows:
-        data[type_] = count
+    data = dict()
+    if q.type == "thumbs":
+        values = dict(positive=0, negative=0)
+        for count, value in rows:
+            if value == 1:
+                values["positive"] = count
+            elif value == -1:
+                values["negative"] = count
+        data["values"] = values
 
-    return jsonify(data)
+    return jsonify(data), 200
 
 
-@app.route("/feedback", methods=['GET', 'POST'])
-def feedback():
+@app.route("/feedback/<string:key>/answer", methods=['GET', 'POST'])
+def answer(key: str):
     if request.method == "POST":
-        return post_feedback(request.json), 200
-    return get_feedback(), 200
+        return post_answer(key, request.json)
+    return get_answers(key)
 
 
-@app.route("/feedback/summary", methods=['GET'])
-def feedback_summary():
-    return get_feedback_summary(), 200
+@app.route("/feedback/<string:key>", methods=['GET'])
+def feedback(key: str):
+    return get_feedback(key)
+
+
+@app.route("/feedback/<string:key>/summary", methods=['GET'])
+def feedback_summary(key: str):
+    return get_feedback_summary(key)
