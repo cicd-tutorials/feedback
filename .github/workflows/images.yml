@@ -8,6 +8,7 @@ on:
       - front-end/**
       - test/**
       - docker-compose*
+      - .github/workflows/images.yml
   pull_request:
     branches:
       - main
@@ -16,6 +17,7 @@ on:
       - front-end/**
       - test/**
       - docker-compose*
+      - .github/workflows/images.yml
 
 jobs:
   test:
@@ -28,13 +30,13 @@ jobs:
           - proxy-pass
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Test container images
         run: |
           docker compose -f docker-compose.test-${{ matrix.test }}.yml up --exit-code-from test
       - name: Store logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: acceptance-test-${{ matrix.test }}-logs
           path: out/
@@ -45,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -57,8 +59,8 @@ jobs:
           docker build back-end/ -t back-end
           docker build front-end/ -t front-end
           for tag in ${{ github.run_number }} latest; do
-            docker tag back-end ghcr.io/kangasta/three-tier-example-app-api:$tag
-            docker push ghcr.io/kangasta/three-tier-example-app-api:$tag
-            docker tag front-end ghcr.io/kangasta/three-tier-example-app-ui:$tag
-            docker push ghcr.io/kangasta/three-tier-example-app-ui:$tag
+            docker tag back-end ghcr.io/${{ github.repository }}-api:$tag
+            docker push ghcr.io/${{ github.repository }}-api:$tag
+            docker tag front-end ghcr.io/${{ github.repository }}-ui:$tag
+            docker push ghcr.io/${{ github.repository }}-ui:$tag
           done
