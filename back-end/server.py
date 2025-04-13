@@ -78,6 +78,19 @@ class FeedbackAnswer(db.Model):
         )
 
 
+class FeedbackException(Exception):
+    def __init__(self, message: str, status: int = 500):
+        super().__init__(message)
+        self.message = message
+        self.status = status
+
+    @property
+    def json(self):
+        return dict(
+            error=self.message,
+        )
+
+
 # Create table if it does not exist
 for _ in range(5):
     try:
@@ -96,44 +109,78 @@ for _ in range(5):
         sleep(2)
 
 
-def get_feedback(key: str):
+def get_question(key: str):
     q = db.session.query(FeedbackQuestion).filter(FeedbackQuestion.key == key).one_or_none()
     if q is None:
-        return dict(error="Question not found"), 404
-    return jsonify(q.json), 200
+        raise FeedbackException("Question not found", 404)
+    return q
+
+
+def get_feedback(key: str):
+    return jsonify(get_question(key).json), 200
 
 
 def get_answers(key: str):
-    q = db.session.query(FeedbackQuestion).filter(FeedbackQuestion.key == key).one_or_none()
-    if q is None:
-        return dict(error="Question not found"), 404
+    get_question(key)
 
     rows = db.session.execute(db.select(FeedbackAnswer).where(FeedbackAnswer.key == key)).all()
     return jsonify([row.FeedbackAnswer.json for row in rows]), 200
 
 
-def post_answer(key: str, input):
-    q = db.session.query(FeedbackQuestion).filter(FeedbackQuestion.key == key).one_or_none()
-    if q is None:
-        return dict(error="Question not found"), 404
+def validate_value(q: FeedbackQuestion, value: int):
+    if q.type == "thumbs":
+        if value not in [-1, 1]:
+            raise FeedbackException("Invalid value", 400)
 
-    id_ = str(uuid4())
 
-    submitted_at = None
+def update_answer(key: str, id_: str, input) -> FeedbackAnswer:
+    q = get_question(key)
+
+    if id_ is None:
+        id_ = str(uuid4())
+        a = FeedbackAnswer(
+            id=id_,
+            key=key,
+            created_at=datetime.utcnow(),
+        )
+    else:
+        a = db.session.query(FeedbackAnswer).filter(FeedbackAnswer.id == id_).one_or_none()
+        if a is None:
+            raise FeedbackException("Answer not found", 404)
+        if a.key != key:
+            raise FeedbackException("Answer does not belong to given question", 400)
+        a.updated_at = datetime.utcnow()
+
     if input.get("submit") == True:
-        submitted_at = datetime.utcnow()
+        a.submitted_at = datetime.utcnow()
 
-    # TODO: validate input
-    db.session.add(FeedbackAnswer(
-        id=id_,
-        key=key,
-        value=input.get("value"),
-        created_at=datetime.utcnow(),
-        submitted_at=submitted_at,
-    ))
+    if input.get("value") is not None:
+        value = input.get("value")
+        validate_value(q, value)
+        a.value = input.get("value")
+
+    if input.get("comment") is not None:
+        a.comment = input.get("comment")
+
+    if input.get("group") is not None:
+        a.group = input.get("group")
+
+    return a
+
+
+def patch_answer(key: str, id_: str, input):
+    a = update_answer(key, id_, input)
     db.session.commit()
 
-    return dict(id=id_), 200
+    return dict(a.json), 200
+
+
+def post_answer(key: str, input):
+    a = update_answer(key, None, input)
+    db.session.add(a)
+    db.session.commit()
+
+    return dict(a.json), 200
 
 
 def get_feedback_summary(key: str):
@@ -161,18 +208,28 @@ def get_feedback_summary(key: str):
     return jsonify(data), 200
 
 
-@app.route("/feedback/<string:key>/answer", methods=['GET', 'POST'])
-def answer(key: str):
-    if request.method == "POST":
-        return post_answer(key, request.json)
-    return get_answers(key)
-
-
 @app.route("/feedback/<string:key>", methods=['GET'])
 def feedback(key: str):
     return get_feedback(key)
 
 
+@app.route("/feedback/<string:key>/answer", methods=['GET', 'POST'])
+def answers(key: str):
+    if request.method == "POST":
+        return post_answer(key, request.json)
+    return get_answers(key)
+
+@app.route("/feedback/<string:key>/answer/<string:id_>", methods=['PATCH'])
+def answer(key: str, id_: str):
+    if request.method == "PATCH":
+        return patch_answer(key, id_, request.json)
+
+
 @app.route("/feedback/<string:key>/summary", methods=['GET'])
 def feedback_summary(key: str):
     return get_feedback_summary(key)
+
+
+@app.errorhandler(FeedbackException)
+def handle_app_error(e):
+    return jsonify(e.json), e.status
