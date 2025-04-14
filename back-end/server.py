@@ -79,15 +79,16 @@ class FeedbackAnswer(db.Model):
 
 
 class FeedbackException(Exception):
-    def __init__(self, message: str, status: int = 500):
-        super().__init__(message)
-        self.message = message
+    def __init__(self, title: str, status: int = 500):
+        super().__init__(title)
+        self.message = title
         self.status = status
 
     @property
     def json(self):
         return dict(
-            error=self.message,
+            title=self.message,
+            status=self.status,
         )
 
 
