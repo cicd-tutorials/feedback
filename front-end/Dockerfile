@@ -1,8 +1,18 @@
+FROM node:lts as build
+
+WORKDIR /app
+COPY ./package* /app/
+RUN npm ci
+
+COPY . /app
+RUN npm run build
+
+
 FROM nginx:alpine
 
 ENV PROXY_PASS=""
 
-COPY index.html styles.css script.js config.js /usr/share/nginx/html/
+COPY --from=build /app/dist /usr/share/nginx/html
 
 RUN rm -f /etc/nginx/conf.d/*
 COPY default.conf.template /etc/nginx/templates/

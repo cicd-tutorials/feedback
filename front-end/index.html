@@ -1,33 +1,24 @@
+<!doctype html>
 <html lang="en">
-  <head>
-    <title>Feedback</title>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="./styles.css" />
-    <script src="./config.js"></script>
-  </head>
-  <body>
-    <script src="./script.js"></script>
-    <header>
-      <h1>Feedback</h1>
-    </header>
-    <main>
-      <p>How are you feeling?</p>
-      <div id="buttons-container" class="buttons">
-        <button onclick="sendFeedback('positive')" type="button">👍</button>
-        <button onclick="sendFeedback('negative')" type="button">👎</button>
-      </div>
-      <div id="results-container" class="results hidden">
-        <div class="results-row">
-          <span>👍</span>
-          <div id="results-bar-positive" class="results-bar"></div>
-          <span id="results-count-positive">0</span>
-        </div>
-        <div class="results-row">
-          <span>👎</span>
-          <div id="results-bar-negative" class="results-bar"></div>
-          <span id="results-count-negative">0</span>
-        </div>
-      </div>
-    </main>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feedback</title>
+  <meta name="description" content="Help us improve." />
+
+  <meta property="og:title" content="Feedback" />
+  <meta property="og:description" content="Help us improve." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="%BASE_URL%" />
+  <meta property="og:image" content="%BASE_URL%/preview.png" />
+
+  <script src="./config.js"></script>
+</head>
+
+<body>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
 </html>
