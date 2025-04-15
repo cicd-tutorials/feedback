@@ -130,7 +130,7 @@
         value={answer?.value}
       />
     </fieldset>
-    {#if answer?.value}
+    {#if answer?.value != undefined}
       {#if question?.with_comment}
         <Comment
           label={question?.comment_text}

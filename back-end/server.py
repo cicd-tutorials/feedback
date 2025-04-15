@@ -48,6 +48,13 @@ types = dict(
         Choice(value=-1, label="👎", title="Thumbs down"),
         Choice(value=1, label="👍", title="Thumbs up"),
     ]),
+    weather=Type(choices=[
+        Choice(value=-2, label="⛈️", title="Stormy"),
+        Choice(value=-1, label="🌧️", title="Rainy"),
+        Choice(value=0, label="☁️", title="Cloudy"),
+        Choice(value=1, label="⛅", title="Partially sunny"),
+        Choice(value=2, label="☀️", title="Sunny"),
+    ]),
 )
 
 
@@ -142,6 +149,13 @@ for _ in range(5):
                 key="thumbs",
                 text="How are you feeling?",
                 type="thumbs",
+                comment_text="Do you want to provide additional comments?",
+                with_comment=True,
+            ))
+            db.session.add(FeedbackQuestion(
+                key="weather",
+                text="How are you feeling?",
+                type="weather",
                 comment_text="Do you want to provide additional comments?",
                 with_comment=True,
             ))

@@ -12,13 +12,13 @@
   let selectedValue = $state<number>();
 
   $effect(() => {
-    if (value) {
+    if (value != undefined) {
       selectedValue = value;
     }
   });
 
   $effect(() => {
-    if (selectedValue && selectedValue !== value) {
+    if (selectedValue != undefined && selectedValue !== value) {
       onChange(selectedValue);
     }
   });
