@@ -1,3 +1,3 @@
-FROM ghcr.io/kangasta/robot-selenium-chromium:latest
+FROM ghcr.io/cicd-tutorials/robot-browser:latest
 
 COPY ./suites/ ./suites/

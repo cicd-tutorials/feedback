@@ -5,7 +5,7 @@ services:
     build: ./test/
     command:
       - -v
-      - URL:http://ui
+      - URL:http://ui?key=thumbs
       - -d
       - /out
     volumes:
