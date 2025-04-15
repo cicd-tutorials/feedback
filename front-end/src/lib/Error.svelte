@@ -14,6 +14,10 @@
 </div>
 
 <style>
+  .error {
+    margin-top: 1rem;
+  }
+
   .status {
     background-color: var(--color-error);
     color: var(--color-bg);
