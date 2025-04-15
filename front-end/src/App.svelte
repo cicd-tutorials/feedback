@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
 
   import logo from "/logo.svg";
-  import Thumbs from "./lib/Thumbs.svelte";
+  import RadioGroup from "./lib/RadioGroup.svelte";
   import {
     createAnswer,
     getQuestion,
@@ -122,7 +122,9 @@
   {:else if question && !answer?.submitted_at}
     <fieldset>
       <legend>{question.text}</legend>
-      <Thumbs
+      <RadioGroup
+        items={question.choices}
+        name={question.type}
         onChange={(value) => handleChange({ value })}
         value={answer?.value}
       />

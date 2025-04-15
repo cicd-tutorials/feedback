@@ -7,12 +7,19 @@ export const baseUrl = () => {
   }
 }
 
+export interface Choice {
+  label: string;
+  value: number;
+  title: string;
+}
+
 export interface Question {
   key: string;
   text: string;
   type: string;
   comment_text: string;
   with_comment: boolean;
+  choices: Choice[];
 }
 
 export interface Answer {

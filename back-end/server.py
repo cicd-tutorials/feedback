@@ -17,12 +17,36 @@ db = SQLAlchemy(app)
 
 
 @dataclass
+class Choice:
+    value: int
+    label: str
+    title: str
+
+    @property
+    def json(self):
+        return dict(
+            value=self.value,
+            label=self.label,
+            title=self.title,
+        )
+
+
+@dataclass
 class Type:
-    values: list[str]
+    choices: list[Choice]
+
+    @property
+    def json(self):
+        return dict(
+            choices=[c.json for c in self.choices],
+        )
 
 
 types = dict(
-    thumbs=Type(values=[-1, 1]),
+    thumbs=Type(choices=[
+        Choice(value=-1, label="👎", title="Thumbs down"),
+        Choice(value=1, label="👍", title="Thumbs up"),
+    ]),
 )
 
 
@@ -42,13 +66,14 @@ class FeedbackQuestion(db.Model):
 
     @property
     def json(self):
-        return dict(
+        data = dict(
             key=self.key,
             text=self.text,
             type=self.type,
             comment_text=self.comment_text,
             with_comment=self.with_comment,
         )
+        return {**data, **types.get(self.type).json}
 
 
 def _timestamp(input: datetime | None) -> str | None:
@@ -147,9 +172,9 @@ def validate_value(q: FeedbackQuestion, value: int):
     if t is None:
         raise FeedbackException(f"Invalid question type: expected one of {list(types.keys())}, got {q.type}", 400)
 
-    expected = t.values
+    expected = [i.value for i in t.choices]
     if value not in expected:
-        raise FeedbackException(f"Invalid value: expected one of {expected}, got {value}", 400, expected)
+        raise FeedbackException(f"Invalid value: expected one of {expected}, got {value}", 400)
 
 
 def update_answer(key: str, id_: str, input) -> FeedbackAnswer:
@@ -205,6 +230,8 @@ def post_answer(key: str, input):
 def value_to_str(value: int | None) -> str:
     if value is None:
         return ""
+    if isinstance(value, Choice):
+        return str(value.value)
     return str(value)
 
 
@@ -221,8 +248,8 @@ def get_feedback_summary(key: str):
             FeedbackAnswer.value)).all()
 
     values = {}
-    for v in types.get(q.type).values:
-        values[value_to_str(v)] = 0
+    for c in types.get(q.type).choices:
+        values[value_to_str(c)] = 0
     values[value_to_str(None)] = 0
 
     for count, value in rows:

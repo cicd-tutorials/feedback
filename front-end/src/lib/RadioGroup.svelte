@@ -1,10 +1,8 @@
 <script lang="ts">
+  import type { Choice } from "./api";
+
   interface Props {
-    items: {
-      value: number;
-      label: string;
-      title: string;
-    }[];
+    items: Choice[];
     name: string;
     onChange: (value: number) => void;
     value?: number;

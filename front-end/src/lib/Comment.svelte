@@ -10,7 +10,7 @@
   let timer = $state<number>();
 
   $effect(() => {
-    if (value && currentValue === undefined) {
+    if (value && currentValue == undefined) {
       currentValue = value;
     }
   });
@@ -20,7 +20,7 @@
       clearTimeout(timer);
     }
 
-    if (currentValue !== value) {
+    if (currentValue != value) {
       timer = setTimeout(() => {
         onChange(currentValue ?? "");
       }, 750);
