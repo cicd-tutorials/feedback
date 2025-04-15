@@ -17,6 +17,7 @@
   import Loading from "./lib/Loading.svelte";
   import Error from "./lib/Error.svelte";
   import Submit from "./lib/Submit.svelte";
+  import Comment from "./lib/Comment.svelte";
 
   let loading = $state(true);
   let error = $state<Problem | null>(null);
@@ -119,15 +120,22 @@
   {:else if error}
     <Error {error} />
   {:else if question && !answer?.submitted_at}
-    <div class="question">
-      <p>{question.text}</p>
+    <fieldset>
+      <legend>{question.text}</legend>
       <Thumbs
         onChange={(value) => handleChange({ value })}
         value={answer?.value}
       />
-    </div>
+    </fieldset>
     {#if answer?.value}
-    <Submit onSubmit={handleSubmit} />
+      {#if question?.with_comment}
+        <Comment
+          label={question?.comment_text}
+          onChange={(comment) => handleChange({ comment })}
+          value={answer?.comment}
+        />
+      {/if}
+      <Submit onSubmit={handleSubmit} />
     {/if}
   {:else if question && answer?.submitted_at}
     <div class="summary">
@@ -167,5 +175,18 @@
 
   main {
     flex: 1;
+  }
+
+  fieldset {
+    appearance: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  legend {
+    appearance: none;
+    margin: 1rem 0;
+    padding: 0;
   }
 </style>

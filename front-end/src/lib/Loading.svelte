@@ -16,7 +16,7 @@
   }
 
   .dot {
-    background-color: var(--color-secondary);
+    background-color: var(--color-primary);
     border-radius: 50%;
     height: 0.5rem;
     width: 0.5rem;

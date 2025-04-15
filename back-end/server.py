@@ -31,11 +31,13 @@ class FeedbackQuestion(db.Model):
     key: str
     text: str
     type: str
+    comment_text: str
     with_comment: bool
 
     key = db.Column(db.String(64), primary_key=True)
     text = db.Column(db.String(512))
     type = db.Column(db.String(16))
+    comment_text = db.Column(db.String(512))
     with_comment = db.Column(db.Boolean())
 
     @property
@@ -44,6 +46,7 @@ class FeedbackQuestion(db.Model):
             key=self.key,
             text=self.text,
             type=self.type,
+            comment_text=self.comment_text,
             with_comment=self.with_comment,
         )
 
@@ -110,10 +113,11 @@ for _ in range(5):
 
             # TODO: Check if the table is empty
             db.session.add(FeedbackQuestion(
-                key="how-are-you-feeling",
+                key="thumbs",
                 text="How are you feeling?",
                 type="thumbs",
-                with_comment=False,
+                comment_text="Do you want to provide additional comments?",
+                with_comment=True,
             ))
             db.session.commit()
     except BaseException:

@@ -11,6 +11,7 @@ export interface Question {
   key: string;
   text: string;
   type: string;
+  comment_text: string;
   with_comment: boolean;
 }
 

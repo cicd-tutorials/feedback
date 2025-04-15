@@ -61,7 +61,7 @@
     border-color: var(--color-fg);
   }
 
-  .item:has(:focus-visible) {
+  .item:has(:focus) {
     outline: 2px solid var(--color-fg);
     outline-offset: 0.25rem;
   }
