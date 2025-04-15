@@ -71,7 +71,7 @@
   }
 
   .item:active {
-    transform: translateY(0.15rem);
+    transform: translateY(0.1rem);
   }
 
   input[type="radio"] {

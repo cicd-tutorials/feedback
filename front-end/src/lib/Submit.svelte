@@ -30,8 +30,8 @@
   }
 
   button:active {
-    box-shadow: 0 -0.05rem 0.25rem rgba(0, 0, 0, 0.5);
-    transform: translateY(0.15rem);
+    box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.5);
+    transform: translateY(0.1rem);
   }
 
   button:focus-visible {
