@@ -23,7 +23,7 @@
     if (currentValue != value) {
       timer = setTimeout(() => {
         onChange(currentValue ?? "");
-      }, 750);
+      }, 1500);
     }
   });
 </script>
