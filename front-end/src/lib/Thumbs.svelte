@@ -1,11 +1,25 @@
 <script lang="ts">
+  import RadioGroup from "./RadioGroup.svelte";
+
   interface Props {
-    onSelect: (value: number) => void;
+    onChange: (value: number) => void;
+    value?: number;
   }
 
-  let { onSelect }: Props = $props();
+  let { onChange, value }: Props = $props();
+
+  const items = [
+    {
+      value: -1,
+      label: "👎",
+      title: "Thumbs down",
+    },
+    {
+      value: 1,
+      label: "👍",
+      title: "Thumbs up",
+    },
+  ];
 </script>
 
-<div>
-  Thumbs
-</div>
+<RadioGroup {items} name="thumbs" {onChange} {value} />

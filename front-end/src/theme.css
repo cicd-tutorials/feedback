@@ -1,9 +1,12 @@
 :root {
     --color-bg: #1e2129;
     --color-fg: rgba(226, 228, 233, 0.82);
+    --color-border: rgba(226, 228, 233, 0.3);
 
     --color-primary: #546d78;
     --color-secondary: #ff6e42;
     --color-error: #ef5552;
     --color-success: #4cae4f;
+
+    --border-radius: 0.25rem;
 }

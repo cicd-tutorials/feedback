@@ -12,10 +12,12 @@ check_summary() {
     len=$(curl -s $base_url/feedback/how-are-you-feeling/answer | jq 'length')
     test "$len" -eq $1
 
-    positive=$(curl -s $base_url/feedback/how-are-you-feeling/summary | jq .values.positive)
+    positive=$(curl -s $base_url/feedback/how-are-you-feeling/summary | jq .'values."1"')
     test "$positive" -eq $2
-    negative=$(curl -s $base_url/feedback/how-are-you-feeling/summary | jq .values.negative)
+    negative=$(curl -s $base_url/feedback/how-are-you-feeling/summary | jq .'values."-1"')
     test "$negative" -eq $3
+    empty=$(curl -s $base_url/feedback/how-are-you-feeling/summary | jq .'values.""')
+    test "$empty" -eq $4
 }
 
 len=$(curl -s $base_url/feedback/how-are-you-feeling/answer | jq 'length')
@@ -31,8 +33,9 @@ done;
 
 last=$(curl -s -X POST -H "Content-Type: application/json" -d "{\"value\": -1}" $base_url/feedback/how-are-you-feeling/answer | jq .id -r)
 
-check_summary 4 2 2
+check_summary 4 2 2 0
 
 curl -s -X PATCH -H "Content-Type: application/json" -d "{\"value\": 1, \"submit\": true}" $base_url/feedback/how-are-you-feeling/answer/$last
+curl -s -X POST -H "Content-Type: application/json" -d "{}" $base_url/feedback/how-are-you-feeling/answer
 
-check_summary 4 3 1
+check_summary 5 3 1 1

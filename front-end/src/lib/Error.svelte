@@ -21,7 +21,7 @@
     line-height: 2rem;
     font-size: 2rem;
     padding: 0 0.25rem;
-    border-radius: 0.25rem;
+    border-radius: var(--border-radius);
   }
 
   .title {

@@ -17,9 +17,16 @@ export interface Question {
 export interface Answer {
   id: string;
   key: string;
-  value: string;
+  value: number;
   comment: string;
+  group: string;
   submitted_at: string;
+}
+
+export type UpdateAnswerPayload = Partial<Pick<Answer, "value" | "comment" | "group"> & {submit: boolean}>;
+
+export interface Summary {
+  values: Record<string, number>;
 }
 
 export interface Problem {
@@ -56,7 +63,7 @@ export const createAnswer = async (key: string): Promise<APIResponse<Answer>> =>
   return buildResponse<Answer>(response);
 }
 
-export const updateAnswer = async (key: string, id: string, payload: Answer): Promise<APIResponse<Answer>> => {
+export const updateAnswer = async (key: string, id: string, payload: UpdateAnswerPayload): Promise<APIResponse<Answer>> => {
   const response = await fetch(`${baseUrl()}/feedback/${key}/answer/${id}`, {
     method: "PATCH",
     body: JSON.stringify(payload),
@@ -65,4 +72,9 @@ export const updateAnswer = async (key: string, id: string, payload: Answer): Pr
     },
   });
   return buildResponse<Answer>(response);
+}
+
+export const getSummary = async (key: string): Promise<APIResponse<Summary>> => {
+  const response = await fetch(`${baseUrl()}/feedback/${key}/summary`);
+  return buildResponse<Summary>(response);
 }

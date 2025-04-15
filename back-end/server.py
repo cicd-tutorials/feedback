@@ -17,6 +17,16 @@ db = SQLAlchemy(app)
 
 
 @dataclass
+class Type:
+    values: list[str]
+
+
+types = dict(
+    thumbs=Type(values=[-1, 1]),
+)
+
+
+@dataclass
 class FeedbackQuestion(db.Model):
     key: str
     text: str
@@ -129,9 +139,13 @@ def get_answers(key: str):
 
 
 def validate_value(q: FeedbackQuestion, value: int):
-    if q.type == "thumbs":
-        if value not in [-1, 1]:
-            raise FeedbackException("Invalid value", 400)
+    t = types.get(q.type)
+    if t is None:
+        raise FeedbackException(f"Invalid question type: expected one of {list(types.keys())}, got {q.type}", 400)
+
+    expected = t.values
+    if value not in expected:
+        raise FeedbackException(f"Invalid value: expected one of {expected}, got {value}", 400, expected)
 
 
 def update_answer(key: str, id_: str, input) -> FeedbackAnswer:
@@ -184,6 +198,12 @@ def post_answer(key: str, input):
     return dict(a.json), 200
 
 
+def value_to_str(value: int | None) -> str:
+    if value is None:
+        return ""
+    return str(value)
+
+
 def get_feedback_summary(key: str):
     q = db.session.query(FeedbackQuestion).filter(FeedbackQuestion.key == key).one_or_none()
     if q is None:
@@ -196,16 +216,15 @@ def get_feedback_summary(key: str):
             FeedbackAnswer.value).where(FeedbackAnswer.key == key).group_by(
             FeedbackAnswer.value)).all()
 
-    data = dict()
-    if q.type == "thumbs":
-        values = dict(positive=0, negative=0)
-        for count, value in rows:
-            if value == 1:
-                values["positive"] = count
-            elif value == -1:
-                values["negative"] = count
-        data["values"] = values
+    values = {}
+    for v in types.get(q.type).values:
+        values[value_to_str(v)] = 0
+    values[value_to_str(None)] = 0
 
+    for count, value in rows:
+        values[value_to_str(value)] = count
+
+    data = dict(values=values)
     return jsonify(data), 200
 
 

@@ -6,17 +6,23 @@
   import {
     createAnswer,
     getQuestion,
+    getSummary,
+    updateAnswer,
     type Answer,
     type Problem,
     type Question,
+    type Summary,
+    type UpdateAnswerPayload,
   } from "./lib/api";
   import Loading from "./lib/Loading.svelte";
   import Error from "./lib/Error.svelte";
+  import Submit from "./lib/Submit.svelte";
 
   let loading = $state(true);
   let error = $state<Problem | null>(null);
   let question = $state<Question | null>(null);
   let answer = $state<Answer | null>(null);
+  let summary = $state<Summary | null>(null);
 
   onMount(() => {
     const initAnswer = async () => {
@@ -60,7 +66,45 @@
     initAnswer();
   });
 
-  const handleSelect = (value: number) => {};
+  const handleChange = async (payload: UpdateAnswerPayload) => {
+    if (!answer) {
+      return;
+    }
+
+    try {
+      const ar = await updateAnswer(answer?.key, answer?.id, payload);
+      if (ar.error) {
+        error = ar.error;
+        return;
+      }
+      answer = ar.data;
+    } catch (_) {
+      error = {
+        status: 500,
+        title: "Failed to update feedback.",
+      };
+    }
+  };
+
+  const handleSubmit = async () => {
+    loading = true;
+    await handleChange({ submit: true });
+    try {
+      const sr = await getSummary(answer?.key ?? "");
+      if (sr.error) {
+        error = sr.error;
+        return;
+      }
+      summary = sr.data;
+    } catch (_) {
+      error = {
+        status: 500,
+        title: "Failed to fetch summary.",
+      };
+    } finally {
+      loading = false;
+    }
+  };
 </script>
 
 <header>
@@ -74,10 +118,21 @@
     <Loading />
   {:else if error}
     <Error {error} />
-  {:else if question}
+  {:else if question && !answer?.submitted_at}
     <div class="question">
       <p>{question.text}</p>
-      <Thumbs onSelect={handleSelect} />
+      <Thumbs
+        onChange={(value) => handleChange({ value })}
+        value={answer?.value}
+      />
+    </div>
+    {#if answer?.value}
+    <Submit onSubmit={handleSubmit} />
+    {/if}
+  {:else if question && answer?.submitted_at}
+    <div class="summary">
+      <p>Thank you for your feedback!</p>
+      <pre>{JSON.stringify(summary, null, 2)}</pre>
     </div>
   {/if}
 </main>
@@ -85,8 +140,7 @@
 <style>
   header,
   main {
-    padding: 0 1em;
-    max-width: 800px;
+    width: min(95%, 800px);
     margin: auto;
   }
 
@@ -96,6 +150,8 @@
     align-items: center;
     margin-bottom: 2em;
     height: 48px;
+
+    border-bottom: 1px solid var(--color-border);
   }
 
   header .logo {
