@@ -34,6 +34,8 @@ export interface Answer {
 export type UpdateAnswerPayload = Partial<Pick<Answer, "value" | "comment" | "group"> & {submit: boolean}>;
 
 export interface Summary {
+  count_non_null: number;
+  count_total: number;
   values: Record<string, number>;
 }
 

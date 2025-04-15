@@ -252,10 +252,20 @@ def get_feedback_summary(key: str):
         values[value_to_str(c)] = 0
     values[value_to_str(None)] = 0
 
+    total = 0
+    non_null = 0
     for count, value in rows:
         values[value_to_str(value)] = count
 
-    data = dict(values=values)
+        total += count
+        if value is not None:
+            non_null += count
+
+    data = dict(
+        count_non_null=non_null,
+        count_total=total,
+        values=values,
+    )
     return jsonify(data), 200
 
 

@@ -18,6 +18,7 @@
   import Error from "./lib/Error.svelte";
   import Submit from "./lib/Submit.svelte";
   import Comment from "./lib/Comment.svelte";
+    import BarChart from "./lib/BarChart.svelte";
 
   let loading = $state(true);
   let error = $state<Problem | null>(null);
@@ -139,10 +140,10 @@
       {/if}
       <Submit onSubmit={handleSubmit} />
     {/if}
-  {:else if question && answer?.submitted_at}
+  {:else if question && answer?.submitted_at && summary}
     <div class="summary">
       <p>Thank you for your feedback!</p>
-      <pre>{JSON.stringify(summary, null, 2)}</pre>
+      <BarChart choices={question.choices} {summary} />
     </div>
   {/if}
 </main>
