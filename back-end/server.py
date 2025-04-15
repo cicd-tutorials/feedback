@@ -11,7 +11,8 @@ from sqlalchemy import func
 
 app = Flask(__name__)
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = getenv('FEEDBACK_DB_URL', 'sqlite:///server.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = getenv(
+    'FEEDBACK_DB_URL', 'sqlite:///server.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -150,7 +151,8 @@ for _ in range(5):
 
 
 def get_question(key: str):
-    q = db.session.query(FeedbackQuestion).filter(FeedbackQuestion.key == key).one_or_none()
+    q = db.session.query(FeedbackQuestion).filter(
+        FeedbackQuestion.key == key).one_or_none()
     if q is None:
         raise FeedbackException("Question not found", 404)
     return q
@@ -163,18 +165,24 @@ def get_feedback(key: str):
 def get_answers(key: str):
     get_question(key)
 
-    rows = db.session.execute(db.select(FeedbackAnswer).where(FeedbackAnswer.key == key)).all()
+    rows = db.session.execute(
+        db.select(FeedbackAnswer).where(
+            FeedbackAnswer.key == key)).all()
     return jsonify([row.FeedbackAnswer.json for row in rows]), 200
 
 
 def validate_value(q: FeedbackQuestion, value: int):
     t = types.get(q.type)
     if t is None:
-        raise FeedbackException(f"Invalid question type: expected one of {list(types.keys())}, got {q.type}", 400)
+        raise FeedbackException(
+            "Invalid question type: "
+            f"expected one of {list(types.keys())}, got {q.type}",
+            400)
 
     expected = [i.value for i in t.choices]
     if value not in expected:
-        raise FeedbackException(f"Invalid value: expected one of {expected}, got {value}", 400)
+        raise FeedbackException(
+            f"Invalid value: expected one of {expected}, got {value}", 400)
 
 
 def update_answer(key: str, id_: str, input) -> FeedbackAnswer:
@@ -188,14 +196,16 @@ def update_answer(key: str, id_: str, input) -> FeedbackAnswer:
             created_at=datetime.utcnow(),
         )
     else:
-        a = db.session.query(FeedbackAnswer).filter(FeedbackAnswer.id == id_).one_or_none()
+        a = db.session.query(FeedbackAnswer).filter(
+            FeedbackAnswer.id == id_).one_or_none()
         if a is None:
             raise FeedbackException("Answer not found", 404)
         if a.key != key:
-            raise FeedbackException("Answer does not belong to given question", 400)
+            raise FeedbackException(
+                "Answer does not belong to given question", 400)
         a.updated_at = datetime.utcnow()
 
-    if input.get("submit") == True:
+    if input.get("submit"):
         a.submitted_at = datetime.utcnow()
 
     if input.get("value") is not None:
@@ -236,7 +246,8 @@ def value_to_str(value: int | None) -> str:
 
 
 def get_feedback_summary(key: str):
-    q = db.session.query(FeedbackQuestion).filter(FeedbackQuestion.key == key).one_or_none()
+    q = db.session.query(FeedbackQuestion).filter(
+        FeedbackQuestion.key == key).one_or_none()
     if q is None:
         return dict(error="Question not found"), 404
 
@@ -279,6 +290,7 @@ def answers(key: str):
     if request.method == "POST":
         return post_answer(key, request.json)
     return get_answers(key)
+
 
 @app.route("/feedback/<string:key>/answer/<string:id_>", methods=['PATCH'])
 def answer(key: str, id_: str):
