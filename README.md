@@ -1,11 +1,33 @@
-# Three-tier example app
+# Feedback
 
 This is an example application for:
 
 - Learning basics of how modern web applications are built with HTML, CSS, JavaScript, servers, and databases.
 - Deploying something a little more advanced than a _Hello world!_ page or unconfigured nginx server.
 
-## Creating the application
+## Building blocks
+
+The application is built using a three-tier archtitecture. I.e., the application consists of presentation tier, application tier and a data tier.
+
+<!-- TODO: paragraph or two on how these are executed with docker compose -->
+
+### Presentation tier
+
+The presentation tier of the application is implemented as Svelte application in [front-end](./front-end) directory. Svelte is a user-interface (UI) framework used to build the HTML, JavaScript, and CSS files that the browser renders and runs on the users machine.
+
+<!-- TODO: paragraph about how nginx is used to serve these files -->
+
+### Application tier
+
+The application tier of the application is implemented with Python in [back-end](./back-end) directory.
+
+<!-- TODO: more detailed description of the server and how it is executed and connected to UI and DB -->
+
+### Data tier
+
+The data tier of the application is provided by Postgres SQL database.
+
+<!-- TODO: move relevant parts from here to sections above
 
 This section describes step-by-step how this application was created. To be able to follow these step-by-step instructions, you will need:
 
@@ -651,3 +673,4 @@ docker-compose up
 ```
 
 Open then `http://localhost:8081` with your browser. You should see the feedback page, be able to post feedback by clicking the buttons, and see the feedback summary after clicking either one of the buttons.
+-->
