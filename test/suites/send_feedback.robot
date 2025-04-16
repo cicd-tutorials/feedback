@@ -1,41 +1,45 @@
 *** Settings ***
 Library             OperatingSystem
-Library             SeleniumLibrary
+Library             Browser  auto_closing_level=SUITE
 Suite Setup         Check URL and open browser
 Suite Teardown      Close browser
 
 *** Variables ***
-${BROWSER}          headlesschrome
-${BROWSER_OPTIONS}  ${EMPTY}
+${BROWSER}          chromium
 ${URL}              ${EMPTY}
-${WAIT_PAGE_LOAD}   10 seconds
 
 *** Test cases ***
 Send positive feedback
-    Go to  ${URL}
-    Sleep  ${WAIT_PAGE_LOAD}
-    Click button  //*[text()="👍"]
+    New Page  ${URL}
+    Click  text=👍
+    Click  text=Submit
 
 Check feedback was recorded
-    Wait until element contains  id:results-count-positive  1  5 seconds
+    Get value count  Thumbs up  1
 
 Send another positive feedback and check summary
-    Reload page
-    Click button  //*[text()="👍"]
-    Wait until element contains  id:results-count-positive  2  5 seconds
+    Reload
+    Click  text=👍
+    Click  text=Submit
+    Get value count  Thumbs up  2
 
-Send neative feedback and check summary
-    Reload page
-    Click button  //*[text()="👎"]
-    Wait until element contains  id:results-count-negative  1  5 seconds
+Send negative feedback and check summary
+    Reload
+    Click  text=👎
+    Click  text=Submit
+    Get value count  Thumbs down  1
 
 *** Keywords ***
 Open browser defined by environment
-    ${browser_options}=  Get Environment Variable    BROWSER_OPTIONS    ${BROWSER_OPTIONS}
     ${browser}=  Get Environment Variable    BROWSER    ${BROWSER}
-    Open browser    browser=${browser}    options=${browser_options}
-    Set Screenshot Directory  ${OUTPUT DIR}${/}${browser}_screenshots
+    New Browser  ${browser}
+    New Context  viewport={'width': 1280, 'height': 720}
 
 Check URL and open browser
     Skip if  not $URL  msg=Target URL not specified
     Open browser defined by environment
+
+Get value count
+    [Arguments]  ${title}  ${count}
+    ${elem}=  Get element by  title  ${title}
+    Get element  ${elem} >> text=${count}

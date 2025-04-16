@@ -20,7 +20,7 @@ services:
     build: ./test/
     command:
       - -v
-      - URL:http://localhost:8081
+      - URL:http://localhost:8081?key=thumbs
       - -d
       - /out
     network_mode: host
