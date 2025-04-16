@@ -1,7 +1,7 @@
 export const baseUrl = () => {
   try {
     // @ts-ignore: defined in config.js
-    return serverUrl;
+    return serverUrl.replace(/\/+$/, ""); // Remove trailing slashes
   } catch (_) {
     return "http://localhost:5000";
   }
@@ -15,10 +15,10 @@ export interface Choice {
 
 export interface Question {
   key: string;
-  text: string;
   type: string;
-  comment_text: string;
+  choice_text: string;
   with_comment: boolean;
+  comment_text: string;
   choices: Choice[];
 }
 
@@ -64,14 +64,14 @@ const buildResponse = async <T>(
 export const getQuestion = async (
   key: string,
 ): Promise<APIResponse<Question>> => {
-  const response = await fetch(`${baseUrl()}/feedback/${key}`);
+  const response = await fetch(`${baseUrl()}/question/${key}`);
   return buildResponse<Question>(response);
 };
 
 export const createAnswer = async (
   key: string,
 ): Promise<APIResponse<Answer>> => {
-  const response = await fetch(`${baseUrl()}/feedback/${key}/answer`, {
+  const response = await fetch(`${baseUrl()}/question/${key}/answer`, {
     method: "POST",
     body: "{}",
     headers: {
@@ -86,7 +86,7 @@ export const updateAnswer = async (
   id: string,
   payload: UpdateAnswerPayload,
 ): Promise<APIResponse<Answer>> => {
-  const response = await fetch(`${baseUrl()}/feedback/${key}/answer/${id}`, {
+  const response = await fetch(`${baseUrl()}/answer/${id}`, {
     method: "PATCH",
     body: JSON.stringify(payload),
     headers: {
@@ -99,6 +99,6 @@ export const updateAnswer = async (
 export const getSummary = async (
   key: string,
 ): Promise<APIResponse<Summary>> => {
-  const response = await fetch(`${baseUrl()}/feedback/${key}/summary`);
+  const response = await fetch(`${baseUrl()}/question/${key}/summary`);
   return buildResponse<Summary>(response);
 };

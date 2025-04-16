@@ -10,7 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+from os import getenv
 from pathlib import Path
+from urllib.parse import urlparse
+
+import dj_database_url
 
 from feedback.config import get_secret_key
 
@@ -27,8 +31,9 @@ SECRET_KEY = get_secret_key()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+if url := getenv("FEEDBACK_URL"):
+    ALLOWED_HOSTS = ["api", urlparse(url).hostname]
+    CSRF_TRUSTED_ORIGINS = [url]
 
 # Application definition
 
@@ -75,11 +80,21 @@ WSGI_APPLICATION = 'server.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
+db_url = getenv('FEEDBACK_DB_URL')
+if db_url:
+    db = dj_database_url.parse(
+        db_url,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+else:
+    db = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'server.db',
     }
+
+DATABASES = {
+    'default': db
 }
 
 

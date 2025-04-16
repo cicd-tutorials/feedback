@@ -14,7 +14,7 @@ server {
             return 404;
         }
 
-        rewrite ^/api(.*) /$1 break;
+        rewrite ^/api/(.*) /$1 break;
         proxy_pass $api;
     }
 }

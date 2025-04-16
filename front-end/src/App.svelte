@@ -122,7 +122,7 @@
     <Error {error} />
   {:else if question && !answer?.submitted_at}
     <fieldset>
-      <legend>{question.text}</legend>
+      <legend>{question.choice_text}</legend>
       <RadioGroup
         items={question.choices}
         name={question.type}

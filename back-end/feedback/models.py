@@ -58,7 +58,7 @@ class Question(models.Model):
 
     choice_text = models.CharField(max_length=512)
     with_comment = models.BooleanField(default=False)
-    comment_text = models.CharField(max_length=512, blank=True, null=True)
+    comment_text = models.CharField(max_length=512, blank=True)
 
     def __str__(self):
         return f'{self.choice_text} (type={self.type}, key={self.key})'
@@ -73,7 +73,7 @@ class Question(models.Model):
             comment_text=self.comment_text,
         )
         if self.type in TYPES:
-            data["choices"] = TYPES[self.type].json
+            data = {**data, **TYPES[self.type].json}
         return data
 
 
