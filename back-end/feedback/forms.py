@@ -7,7 +7,7 @@ from .models import Answer, TYPES
 class CreateAnswerForm(ModelForm):
     class Meta:
         model = Answer
-        fields = ['question','reference', 'value', 'comment']
+        fields = ['question', 'reference', 'value', 'comment']
 
 
 class ModifyAnswerForm(ModelForm):

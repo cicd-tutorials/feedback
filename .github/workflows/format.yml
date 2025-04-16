@@ -26,4 +26,4 @@ jobs:
       - name: Check formatting
         run: |
           pip install pycodestyle
-          pycodestyle .
+          pycodestyle --exclude back-end/server/settings.py,*/migrations/*.py .

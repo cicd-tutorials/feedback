@@ -5,6 +5,7 @@ import uuid
 from django.core.validators import RegexValidator
 from django.db import models
 
+
 @dataclass
 class Choice:
     value: int
@@ -53,7 +54,11 @@ key_validator = RegexValidator(
 
 
 class Question(models.Model):
-    key = models.CharField(max_length=64, primary_key=True, editable=False, validators=[key_validator])
+    key = models.CharField(
+        max_length=64,
+        primary_key=True,
+        editable=False,
+        validators=[key_validator])
     type = models.CharField()
 
     choice_text = models.CharField(max_length=512)
@@ -93,7 +98,8 @@ class Answer(models.Model):
     submitted_at = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return f'{self.id} (type={self.question.type}, key={self.question.key})'
+        return (
+            f'{self.id} (type={self.question.type}, key={self.question.key})')
 
     @property
     def json(self):

@@ -45,7 +45,8 @@ def question(request: HttpRequest, key: str):
 
 
 def _get_answers(key: str):
-    return JsonResponse([a.json for a in _get_question(key).answer_set.all()], safe=False)
+    return JsonResponse(
+        [a.json for a in _get_question(key).answer_set.all()], safe=False)
 
 
 def _post_answer(request: HttpRequest, key: str):

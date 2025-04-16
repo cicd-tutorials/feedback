@@ -1,5 +1,6 @@
 server {
     set $api "${PROXY_PASS}";
+    set $static_root "${STATIC_ROOT}";
 
     listen       80;
     server_name  localhost;
@@ -9,12 +10,29 @@ server {
         index  index.html index.htm;
     }
 
+    location /static/ {
+        if ($static_root = "") {
+            return 404;
+        }
+
+        rewrite ^/static/(.+) /$1 break;
+        root $static_root;
+    }
+
     location /api {
         if ($api = "") {
             return 404;
         }
 
         rewrite ^/api/(.*) /$1 break;
+        proxy_pass $api;
+    }
+
+    location /admin {
+        if ($api = "") {
+            return 404;
+        }
+
         proxy_pass $api;
     }
 }

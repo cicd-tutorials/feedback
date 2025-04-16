@@ -9,7 +9,7 @@ To install autopep8, ensure you have python and pip installed and run `pip insta
 Format code by running:
 
 ```sh
-autopep8 */*.py -i -aaaa
+autopep8 -aaar --in-place --exclude back-end/server/settings.py,*/migrations/*.py .
 ```
 
 The formatting is checked with [pycodestyle](https://pypi.org/project/pycodestyle/). To install it, run `pip3 install pycodestyle`.
@@ -17,7 +17,7 @@ The formatting is checked with [pycodestyle](https://pypi.org/project/pycodestyl
 Check formatting by running:
 
 ```sh
-pycodestyle .
+pycodestyle --exclude back-end/server/settings.py,*/migrations/*.py .
 ```
 
 ## Formatting other code
