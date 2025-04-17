@@ -1,5 +1,4 @@
-Flask
-flask-cors
-Flask-SQLAlchemy>=3.0.0
-gunicorn
-SQLAlchemy>=2.0.0b1
+django~=5.0
+django-cors-headers~=4.7
+gunicorn~=23.0
+dj-database-url~=2.3

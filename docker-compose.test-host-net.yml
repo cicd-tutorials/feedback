@@ -1,7 +1,8 @@
 services:
   api:
     environment:
-      DB_URL: postgresql://user:pass@db:5432/feedback
+      FEEDBACK_DB_URL: postgresql://user:pass@db:5432/feedback
+      FEEDBACK_URL: http://localhost:5000
     build: ./back-end/
     command: -w 4 -b 0.0.0.0:8000
     ports:
@@ -18,9 +19,9 @@ services:
       POSTGRES_DB: feedback
   test:
     build: ./test/
+    environment:
+      BASE_URL: http://localhost:8081
     command:
-      - -v
-      - URL:http://localhost:8081?key=thumbs
       - -d
       - /out
     network_mode: host

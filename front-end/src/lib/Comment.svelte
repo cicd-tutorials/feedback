@@ -6,11 +6,11 @@
   }
 
   let { label, onChange, value }: Props = $props();
-  let currentValue = $state<string>();
-  let timer = $state<number>();
+  let currentValue = $state<string>("");
+  let timer: number | undefined = undefined;
 
   $effect(() => {
-    if (value && currentValue == undefined) {
+    if (value && currentValue == "") {
       currentValue = value;
     }
   });
