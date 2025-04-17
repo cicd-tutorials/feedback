@@ -15,7 +15,7 @@ The application is built using a three-tier architecture. I.e., the application 
 
 <!-- TODO: Intro to presentation tier -->
 
-The presentation tier of the application is implemented as Svelte application in [front-end](./front-end) directory. Svelte is a JavaScript user-interface (UI) framework used to build the HTML, JavaScript, and CSS files that the browser renders and runs on the users machine.
+The presentation tier of the application is implemented as Svelte application in [front-end](./front-end) directory. [Svelte](https://svelte.dev/) is a JavaScript user-interface (UI) framework used to build the HTML, JavaScript, and CSS files that the browser renders and runs on the users machine.
 
 <!-- TODO: paragraph about how nginx is used to serve these files -->
 
@@ -23,7 +23,7 @@ The presentation tier of the application is implemented as Svelte application in
 
 <!-- TODO: Intro to application tier -->
 
-The application tier of the application is implemented with Django in [back-end](./back-end) directory. Django is a Python web framework that could be used to implement both presentation and the application tiers. In this project it implements the application programming interface (API) and provides an administrator panel for managing the data it stores in the database.
+The application tier of the application is implemented with Django in [back-end](./back-end) directory. [Django](https://www.djangoproject.com/) is a Python web framework that could be used to implement both presentation and the application tiers as well as managing the data tier. In this project it implements the application programming interface (API), handles interaction with the database, and provides an administrator panel for managing the data stored in the database.
 
 <!-- TODO: more detailed description of the server and how it is executed and connected to UI and DB -->
 
