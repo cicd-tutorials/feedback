@@ -3,8 +3,9 @@ include:
 services:
   test:
     build: ./test/
+    network_mode: host
     environment:
-      BASE_URL: http://ui
+      BASE_URL: http://localhost:8080
     command:
       - -d
       - /out
