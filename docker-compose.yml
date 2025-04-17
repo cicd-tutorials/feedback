@@ -8,8 +8,8 @@ services:
     ports:
       - 5000:8000
     volumes:
-      - 'feedback:/var/feedback'
-      - 'staticfiles:/app/static'
+      - "feedback:/var/feedback"
+      - "staticfiles:/app/static"
   ui:
     build: ./front-end/
     ports:
@@ -23,7 +23,7 @@ services:
       - source: resolver.conf
         target: /etc/nginx/conf.d/resolver.conf
     volumes:
-      - 'staticfiles:/app/static'
+      - "staticfiles:/app/static"
   db:
     image: postgres:14
     environment:
