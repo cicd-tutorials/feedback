@@ -6,11 +6,14 @@ Suite Teardown      Close browser
 
 *** Variables ***
 ${BROWSER}          chromium
-${URL}              %{BASE_URL}?key=thumbs
+${URL}              %{BASE_URL}
 
 *** Test cases ***
+Open feedback form
+    New Page  ${URL}?key=thumbs
+    Wait For Elements State  text=How are you feeling?  timeout=1 minute
+
 Send positive feedback
-    New Page  ${URL}
     Click  text=👍
     Click  text=Submit
 
@@ -36,7 +39,7 @@ Open browser defined by environment
     New Context  viewport={'width': 1280, 'height': 720}
 
 Check URL and open browser
-    Skip if  not "%{BASE_URL}"  msg=BASE_URL environment variable not specified
+    Skip if  not $URL  msg=BASE_URL environment variable or URL variable must be defined
     Open browser defined by environment
 
 Get value count

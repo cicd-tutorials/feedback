@@ -8,6 +8,7 @@
     getQuestion,
     getSummary,
     updateAnswer,
+    waitUntilLive,
     type Answer,
     type Problem,
     type Question,
@@ -29,7 +30,10 @@
   onMount(() => {
     const initAnswer = async () => {
       try {
-        // Parse the question key from URL query parameters
+        // Wait until the server has started.
+        await waitUntilLive();
+
+        // Parse the question key from URL query parameters.
         const query = new URLSearchParams(window.location.search);
         const key = query.get("key");
         if (!key) {
@@ -40,7 +44,7 @@
           return;
         }
 
-        // Fetch the question using the key
+        // Fetch the question using the key.
         const qr = await getQuestion(key);
         if (qr.error) {
           error = qr.error;
@@ -48,7 +52,7 @@
         }
         question = qr.data;
 
-        // Initialize the answer
+        // Initialize the answer.
         const ar = await createAnswer(key);
         if (ar.error) {
           error = ar.error;

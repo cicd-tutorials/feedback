@@ -102,3 +102,16 @@ export const getSummary = async (
   const response = await fetch(`${baseUrl()}/question/${key}/summary`);
   return buildResponse<Summary>(response);
 };
+
+export const waitUntilLive = async (): Promise<void> => {
+  try {
+    const response = await fetch(`${baseUrl()}/live`);
+    if (response.status === 200) {
+      return;
+    }
+  } catch (_) {
+    // CORS requests will fail because of missing CORS headers until the server is live.
+  }
+  await new Promise((resolve) => setTimeout(resolve, 2500));
+  return waitUntilLive();
+};

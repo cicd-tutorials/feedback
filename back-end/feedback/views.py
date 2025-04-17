@@ -37,6 +37,10 @@ def _parse_json_body(request: HttpRequest):
         )
 
 
+def live(_: HttpRequest):
+    return JsonResponse({})
+
+
 @_feedback_error_as_json
 def question(request: HttpRequest, key: str):
     if request.method != "GET":
