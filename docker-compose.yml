@@ -3,27 +3,22 @@ services:
     environment:
       FEEDBACK_DB_URL: postgresql://user:pass@db:5432/feedback
       FEEDBACK_URL: http://localhost:8080
-      STATIC_ROOT: /app/static
     build: ./back-end/
     ports:
       - 5000:8000
     volumes:
       - "feedback:/var/feedback"
-      - "staticfiles:/app/static"
   ui:
-    build: ./front-end/
+    build: .
     ports:
       - 8080:80
     environment:
       PROXY_PASS: http://api:8000
-      STATIC_ROOT: /app/static
     configs:
       - source: config.js
         target: /usr/share/nginx/html/config.js
       - source: resolver.conf
         target: /etc/nginx/conf.d/resolver.conf
-    volumes:
-      - "staticfiles:/app/static"
   db:
     image: postgres:14
     environment:
@@ -39,4 +34,3 @@ configs:
       resolver 127.0.0.11;
 volumes:
   feedback:
-  staticfiles:
