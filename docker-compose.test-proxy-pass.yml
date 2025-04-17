@@ -3,9 +3,9 @@ include:
 services:
   test:
     build: ./test/
+    environment:
+      BASE_URL: http://ui
     command:
-      - -v
-      - URL:http://ui?key=thumbs
       - -d
       - /out
     volumes:

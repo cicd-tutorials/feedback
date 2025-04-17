@@ -18,9 +18,9 @@ services:
       POSTGRES_DB: feedback
   test:
     build: ./test/
+    environment:
+      BASE_URL: http://localhost:8081
     command:
-      - -v
-      - URL:http://localhost:8081?key=thumbs
       - -d
       - /out
     network_mode: host

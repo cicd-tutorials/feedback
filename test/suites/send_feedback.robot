@@ -6,7 +6,7 @@ Suite Teardown      Close browser
 
 *** Variables ***
 ${BROWSER}          chromium
-${URL}              ${EMPTY}
+${URL}              %{BASE_URL}?key=thumbs
 
 *** Test cases ***
 Send positive feedback
@@ -36,7 +36,7 @@ Open browser defined by environment
     New Context  viewport={'width': 1280, 'height': 720}
 
 Check URL and open browser
-    Skip if  not $URL  msg=Target URL not specified
+    Skip if  not "%{BASE_URL}"  msg=BASE_URL environment variable not specified
     Open browser defined by environment
 
 Get value count
