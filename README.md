@@ -5,25 +5,31 @@ This is an example application for:
 - Learning basics of how modern web applications are built with HTML, CSS, JavaScript, servers, and databases.
 - Deploying something a little more advanced than a _Hello world!_ page or unconfigured nginx server.
 
-## Building blocks
+## Three-tier archtitecture
 
-The application is built using a three-tier archtitecture. I.e., the application consists of presentation tier, application tier and a data tier.
+The application is built using a three-tier architecture. I.e., the application consists of presentation tier, application tier and a data tier.
 
 <!-- TODO: paragraph or two on how these are executed with docker compose -->
 
 ### Presentation tier
 
-The presentation tier of the application is implemented as Svelte application in [front-end](./front-end) directory. Svelte is a user-interface (UI) framework used to build the HTML, JavaScript, and CSS files that the browser renders and runs on the users machine.
+<!-- TODO: Intro to presentation tier -->
+
+The presentation tier of the application is implemented as Svelte application in [front-end](./front-end) directory. Svelte is a JavaScript user-interface (UI) framework used to build the HTML, JavaScript, and CSS files that the browser renders and runs on the users machine.
 
 <!-- TODO: paragraph about how nginx is used to serve these files -->
 
 ### Application tier
 
-The application tier of the application is implemented with Python in [back-end](./back-end) directory.
+<!-- TODO: Intro to application tier -->
+
+The application tier of the application is implemented with Django in [back-end](./back-end) directory. Django is a Python web framework that could be used to implement both presentation and the application tiers. In this project it implements the application programming interface (API) and provides an administrator panel for managing the data it stores in the database.
 
 <!-- TODO: more detailed description of the server and how it is executed and connected to UI and DB -->
 
 ### Data tier
+
+<!-- TODO: Intro to data tier -->
 
 The data tier of the application is provided by Postgres SQL database.
 
