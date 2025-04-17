@@ -11,8 +11,4 @@ done;
 python3 manage.py create-initial-admin-account
 python3 manage.py create-demo-questions
 
-if [ -n "$STATIC_ROOT" ]; then
-    python3 manage.py collectstatic --no-input;
-fi
-
 exec gunicorn server.wsgi

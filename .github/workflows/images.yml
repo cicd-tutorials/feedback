@@ -6,6 +6,7 @@ on:
     paths:
       - back-end/**
       - front-end/**
+      - Dockerfile
       - test/**
       - docker-compose*
       - .github/workflows/images.yml
@@ -15,6 +16,7 @@ on:
     paths:
       - back-end/**
       - front-end/**
+      - Dockerfile
       - test/**
       - docker-compose*
       - .github/workflows/images.yml
@@ -57,7 +59,7 @@ jobs:
       - name: Push container image to GitHub Container Registry
         run: |
           docker build back-end/ -t back-end
-          docker build front-end/ -t front-end
+          docker build . -t front-end
           for tag in ${{ github.run_number }} latest; do
             docker tag back-end ghcr.io/${{ github.repository }}-api:$tag
             docker push ghcr.io/${{ github.repository }}-api:$tag
