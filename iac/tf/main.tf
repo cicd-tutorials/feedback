@@ -1,10 +1,10 @@
 provider "kubernetes" {
-  # ignore_annotations = [
-  #   "^service\\.beta\\.kubernetes\\.io\\/.*load.*balancer.*"
-  # ]
+  ignore_annotations = [
+    "^service\\.beta\\.kubernetes\\.io\\/.*load.*balancer.*"
+  ]
 }
 
-module "feedback-app" {
+module "feedback_app" {
   source = "./module"
 
   providers = {
@@ -13,5 +13,5 @@ module "feedback-app" {
 }
 
 output "url" {
-  value = module.feedback-app.url
+  value = module.feedback_app.url
 }
