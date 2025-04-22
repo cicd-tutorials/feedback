@@ -32,7 +32,7 @@ jobs:
 
           cd iac/tf/
           tofu init
-          tofu apply -auto-approve -var dns_service=kube-dns -var node_port=30080
+          tofu apply -auto-approve -var-file=../kind/kind.tfvars
           echo "url=$(tofu output -raw url)" >> $GITHUB_OUTPUT
       - name: Run e2e tests
         run: |
