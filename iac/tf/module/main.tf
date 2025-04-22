@@ -1,34 +1,19 @@
-variable "namespace" {
-  type    = string
-  default = "three-tier-example-app"
-}
-
-variable "service_type" {
-  type    = string
-  default = "NodePort"
-}
-
-variable "pvc_storage_class" {
-  type    = string
-  default = ""
-}
-
-variable "app_version" {
-  type    = string
-  default = "latest"
-}
-
-provider "kubernetes" {
-  ignore_annotations = [
-    "^service\\.beta\\.kubernetes\\.io\\/.*load.*balancer.*"
-  ]
+terraform {
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.0"
+    }
+  }
 }
 
 data "kubernetes_nodes" "this" {}
 
 locals {
-  addresses   = data.kubernetes_nodes.this.nodes[0].status[0].addresses
-  external_ip = local.addresses[index(local.addresses.*.type, "ExternalIP")].address
+  addresses       = data.kubernetes_nodes.this.nodes[0].status[0].addresses
+  has_external_ip = contains(local.addresses.*.type, "ExternalIP")
+  external_ip     = local.has_external_ip ? local.addresses[index(local.addresses.*.type, "ExternalIP")].address : ""
+  ui_url          = var.service_type == "LoadBalancer" ? "https://${kubernetes_service.ui.status[0].load_balancer[0].ingress[0].hostname}" : "http://${local.external_ip}:${kubernetes_service.ui.spec[0].port[0].node_port}"
 }
 
 resource "kubernetes_namespace" "this" {
@@ -62,12 +47,17 @@ resource "kubernetes_deployment" "api" {
 
       spec {
         container {
-          image = "ghcr.io/kangasta/three-tier-example-app-api:${var.app_version}"
+          image = "ghcr.io/cicd-tutorials/feedback-api:${var.app_version}"
           name  = "api"
 
           env {
-            name  = "DB_URL"
-            value = "postgresql://user:pass@db:5432/feedback"
+            name  = "FEEDBACK_DB_URL"
+            value = var.db_connect_url != "" ? var.db_connect_url : "postgresql://user:pass@db:5432/feedback"
+          }
+
+          env {
+            name  = "FEEDBACK_URL"
+            value = local.ui_url
           }
         }
       }
@@ -101,7 +91,7 @@ resource "kubernetes_config_map" "ui" {
   }
   data = {
     config   = "const serverUrl = \"/api\";"
-    resolver = "resolver kube-dns.kube-system.svc.cluster.local;"
+    resolver = "resolver coredns.kube-system.svc.cluster.local;"
   }
   depends_on = [kubernetes_service.api]
 }
@@ -131,7 +121,7 @@ resource "kubernetes_deployment" "ui" {
 
       spec {
         container {
-          image = "ghcr.io/kangasta/three-tier-example-app-ui:${var.app_version}"
+          image = "ghcr.io/cicd-tutorials/feedback-ui:${var.app_version}"
           name  = "ui"
 
           env {
@@ -174,7 +164,7 @@ resource "kubernetes_service" "ui" {
     }
 
     port {
-      port        = 80
+      port        = var.service_type == "LoadBalancer" ? 443 : 80
       target_port = 80
     }
 
@@ -191,7 +181,7 @@ resource "kubernetes_persistent_volume_claim" "db" {
   }
 
   spec {
-    storage_class_name = "upcloud-block-storage-maxiops"
+    storage_class_name = var.pvc_storage_class
     access_modes       = ["ReadWriteOnce"]
     resources {
       requests = {
@@ -202,6 +192,8 @@ resource "kubernetes_persistent_volume_claim" "db" {
 }
 
 resource "kubernetes_deployment" "db" {
+  count = var.db_connect_url != "" ? 0 : 1
+
   metadata {
     name      = "db"
     namespace = var.namespace
@@ -273,6 +265,8 @@ resource "kubernetes_deployment" "db" {
 }
 
 resource "kubernetes_service" "db" {
+  count = var.db_connect_url != "" ? 0 : 1
+
   metadata {
     name      = "db"
     namespace = var.namespace
@@ -287,8 +281,4 @@ resource "kubernetes_service" "db" {
       target_port = 5432
     }
   }
-}
-
-output "ui_url" {
-  value = var.service_type == "LoadBalancer" ? kubernetes_service.ui.status[0].load_balancer[0].ingress[0].hostname : "http://${local.external_ip}:${kubernetes_service.ui.spec[0].port[0].node_port}"
 }
