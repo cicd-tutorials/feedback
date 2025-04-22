@@ -10,7 +10,7 @@ tofu init
 terraform init
 ```
 
-The configuration does not specify any authentication for the Kubernetes provider. Use environment variables to configure access to the target cluster. See provider docs ([OpenTofu](), [Terraform](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs)) for details.
+The configuration does not specify any authentication for the Kubernetes provider. Use environment variables to configure access to the target cluster. See provider docs ([OpenTofu](https://search.opentofu.org/provider/hashicorp/kubernetes/latest), [Terraform](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs)) for details.
 
 Apply the configuration:
 
