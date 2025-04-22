@@ -1,32 +1,10 @@
-variable "namespace" {
-  type    = string
-  default = "feedback"
-}
-
-variable "service_type" {
-  type    = string
-  default = "NodePort"
-}
-
-variable "pvc_storage_class" {
-  type    = string
-  default = ""
-}
-
-variable "db_connect_url" {
-  type    = string
-  default = ""
-}
-
-variable "app_version" {
-  type    = string
-  default = "latest"
-}
-
-provider "kubernetes" {
-  ignore_annotations = [
-    "^service\\.beta\\.kubernetes\\.io\\/.*load.*balancer.*"
-  ]
+terraform {
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.0"
+    }
+  }
 }
 
 data "kubernetes_nodes" "this" {}
@@ -303,8 +281,4 @@ resource "kubernetes_service" "db" {
       target_port = 5432
     }
   }
-}
-
-output "ui_url" {
-  value = local.ui_url
 }
