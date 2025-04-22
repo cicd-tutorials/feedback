@@ -10,10 +10,10 @@ terraform {
 data "kubernetes_nodes" "this" {}
 
 locals {
-  addresses   = data.kubernetes_nodes.this.nodes[0].status[0].addresses
+  addresses       = data.kubernetes_nodes.this.nodes[0].status[0].addresses
   has_external_ip = contains(local.addresses.*.type, "ExternalIP")
-  external_ip = local.has_external_ip ? local.addresses[index(local.addresses.*.type, "ExternalIP")].address : ""
-  ui_url      = var.service_type == "LoadBalancer" ? "https://${kubernetes_service.ui.status[0].load_balancer[0].ingress[0].hostname}" : "http://${local.external_ip}:${kubernetes_service.ui.spec[0].port[0].node_port}"
+  external_ip     = local.has_external_ip ? local.addresses[index(local.addresses.*.type, "ExternalIP")].address : ""
+  ui_url          = var.service_type == "LoadBalancer" ? "https://${kubernetes_service.ui.status[0].load_balancer[0].ingress[0].hostname}" : "http://${local.external_ip}:${kubernetes_service.ui.spec[0].port[0].node_port}"
 }
 
 resource "kubernetes_namespace" "this" {
