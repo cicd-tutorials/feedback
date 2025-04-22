@@ -1,0 +1,46 @@
+name: Infrastructure as Code
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - iac/**
+      - .github/workflows/iac.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - iac/**
+      - .github/workflows/iac.yml
+
+jobs:
+  OpenTofu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: kind
+          config: ./iac/kind/config.yaml
+      - name: Deploy with OpenTofu
+        id: tofu
+        run: |
+          kind export kubeconfig --kubeconfig ./kind_kubeconfig.yaml
+          export KUBE_CONFIG_PATH=$(pwd)/kind_kubeconfig.yaml
+
+          cd iac/tf/
+          tofu init
+          tofu apply -auto-approve -var dns_service=kube-dns -var node_port=30080
+          echo "url=$(tofu output -raw url)" >> $GITHUB_OUTPUT
+      - name: Run e2e tests
+        run: |
+          docker build test/ -t test
+          docker run --network host -v ./out:/out test -v URL:${{ steps.tofu.outputs.url }} -d /out
+      - name: Store logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: acceptance-test-kind-logs
+          path: out/

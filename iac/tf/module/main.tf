@@ -12,7 +12,7 @@ data "kubernetes_nodes" "this" {}
 locals {
   addresses       = data.kubernetes_nodes.this.nodes[0].status[0].addresses
   has_external_ip = contains(local.addresses.*.type, "ExternalIP")
-  external_ip     = local.has_external_ip ? local.addresses[index(local.addresses.*.type, "ExternalIP")].address : ""
+  external_ip     = local.has_external_ip ? local.addresses[index(local.addresses.*.type, "ExternalIP")].address : "localhost"
   ui_url          = var.service_type == "LoadBalancer" ? "https://${kubernetes_service.ui.status[0].load_balancer[0].ingress[0].hostname}" : "http://${local.external_ip}:${kubernetes_service.ui.spec[0].port[0].node_port}"
 }
 
@@ -107,7 +107,7 @@ resource "kubernetes_config_map" "ui" {
   }
   data = {
     config   = "const serverUrl = \"/api\";"
-    resolver = "resolver coredns.kube-system.svc.cluster.local;"
+    resolver = "resolver ${var.dns_service}.kube-system.svc.cluster.local;"
   }
   depends_on = [kubernetes_service.api]
 }
@@ -182,6 +182,7 @@ resource "kubernetes_service" "ui" {
     port {
       port        = var.service_type == "LoadBalancer" ? 443 : 80
       target_port = 80
+      node_port   = var.node_port
     }
 
     type = var.service_type
