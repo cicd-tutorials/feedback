@@ -5,7 +5,7 @@ This is an example application for:
 - Learning basics of how modern web applications are built with HTML, CSS, JavaScript, servers, and databases.
 - Deploying something a little more advanced than a _Hello world!_ page or unconfigured nginx server.
 
-## Three-tier archtitecture
+## Three-tier architecture
 
 The application is built using a three-tier architecture. I.e., the application consists of presentation tier, application tier and a data tier.
 
