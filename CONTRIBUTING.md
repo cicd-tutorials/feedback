@@ -20,6 +20,22 @@ Check formatting by running:
 pycodestyle --exclude back-end/server/settings.py,*/migrations/*.py .
 ```
 
+## Formatting TF configuration
+
+This repository uses `tofu fmt` to format `.tf` configuration files.
+
+Format code by running:
+
+```sh
+tofu fmt -recursive
+```
+
+Check formatting by running:
+
+```sh
+tofu fmt -check -recursive
+```
+
 ## Formatting other code
 
 This repository uses [Prettier](https://prettier.io/) to format code with its default settings.
