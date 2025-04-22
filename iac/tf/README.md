@@ -22,6 +22,14 @@ terraform apply
 
 The configuration defines the URL of the user interface as an output named `url`. Open the URL with your browser to use the application.
 
+Use `kubectl exec` (or `kubectl logs`) to see the initial admin password:
+
+```sh
+kubectl exec -n feedback $(kubectl get pods -n feedback -o custom-columns=:.metadata.name | grep api.*) -- cat /var/feedback/initial_admin_password
+```
+
+Note that the initial admin password is only available within the pod when running the API pod for the first time.
+
 ## Use as a module
 
 You can also use the configuration as a module by using `github.com/cicd-tutorials/feedback//iac/tf/module` as the source. For example:
