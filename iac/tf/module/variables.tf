@@ -14,8 +14,9 @@ variable "pvc_storage_class" {
 }
 
 variable "db_connect_url" {
-  type    = string
-  default = ""
+  type      = string
+  default   = ""
+  sensitive = true
 }
 
 variable "app_version" {

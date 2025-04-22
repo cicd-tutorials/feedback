@@ -22,6 +22,17 @@ resource "kubernetes_namespace" "this" {
   }
 }
 
+resource "kubernetes_secret" "api" {
+  metadata {
+    name      = "api"
+    namespace = var.namespace
+  }
+
+  data = {
+    db_connect_url = var.db_connect_url != "" ? var.db_connect_url : "postgresql://user:pass@db:5432/feedback"
+  }
+}
+
 resource "kubernetes_deployment" "api" {
   metadata {
     name      = "api"
@@ -51,8 +62,13 @@ resource "kubernetes_deployment" "api" {
           name  = "api"
 
           env {
-            name  = "FEEDBACK_DB_URL"
-            value = var.db_connect_url != "" ? var.db_connect_url : "postgresql://user:pass@db:5432/feedback"
+            name = "FEEDBACK_DB_URL"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret.api.metadata[0].name
+                key  = "db_connect_url"
+              }
+            }
           }
 
           env {
