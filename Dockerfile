@@ -1,5 +1,6 @@
 FROM node:lts as build
 
+ARG VITE_BUILD
 WORKDIR /app
 COPY front-end/package* /app/
 RUN npm ci

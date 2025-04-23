@@ -9,3 +9,13 @@ body {
   flex-direction: column;
   min-height: 100vh;
 }
+
+a {
+  color: inherit;
+}
+
+a:focus-visible {
+  border-radius: var(--border-radius);
+  outline: 2px solid var(--color-fg);
+  outline-offset: 0.25rem;
+}

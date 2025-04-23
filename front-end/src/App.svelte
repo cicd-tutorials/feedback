@@ -19,7 +19,8 @@
   import Error from "./lib/Error.svelte";
   import Submit from "./lib/Submit.svelte";
   import Comment from "./lib/Comment.svelte";
-    import BarChart from "./lib/BarChart.svelte";
+  import BarChart from "./lib/BarChart.svelte";
+  import Footer from "./lib/Footer.svelte";
 
   let loading = $state(true);
   let error = $state<Problem | null>(null);
@@ -151,10 +152,12 @@
     </div>
   {/if}
 </main>
+<Footer />
 
 <style>
   header,
-  main {
+  main,
+  :global(footer) {
     width: min(95%, 800px);
     margin: auto;
   }
