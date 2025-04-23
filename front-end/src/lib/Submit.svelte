@@ -15,7 +15,9 @@
     border: none;
     border-radius: var(--border-radius);
     box-shadow: 0 0.1rem 0.25rem rgba(0, 0, 0, 0.5);
-    color: var(--color-bg);
+    color: var(--color-fg);
+    font-weight: 500;
+    letter-spacing: 0.5px;
     margin: 2rem 0;
     padding: 0.5rem 1rem;
 
