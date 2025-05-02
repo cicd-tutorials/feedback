@@ -75,13 +75,16 @@ def question_answers(request: HttpRequest, key: str):
 
 @_feedback_error_as_json
 def answer(request: HttpRequest, id_: str):
-    if request.method != "PATCH":
+    if request.method not in ["GET", "PATCH"]:
         raise FeedbackError("Method not allowed", 405)
 
     try:
         a = Answer.objects.get(id=id_)
     except Answer.DoesNotExist:
         raise FeedbackError("Answer not found", 404)
+
+    if request.method == "GET":
+        return JsonResponse(a.json)
 
     data = _parse_json_body(request)
     if data.pop("submit", None):

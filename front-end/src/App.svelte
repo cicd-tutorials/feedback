@@ -5,6 +5,7 @@
   import RadioGroup from "./lib/RadioGroup.svelte";
   import {
     createAnswer,
+    getAnswer,
     getQuestion,
     getSummary,
     updateAnswer,
@@ -23,6 +24,7 @@
   import Footer from "./lib/Footer.svelte";
 
   let loading = $state(true);
+  let view = $state<string>("form");
   let error = $state<Problem | null>(null);
   let question = $state<Question | null>(null);
   let answer = $state<Answer | null>(null);
@@ -34,13 +36,28 @@
         // Wait until the server has started.
         await waitUntilLive();
 
-        // Parse the question key from URL query parameters.
+        // Parse the question key from URL path or URL query parameters.
+        const pathComponents = window.location.pathname.split("/").slice(1);
         const query = new URLSearchParams(window.location.search);
-        const key = query.get("key");
+
+        const key = pathComponents[0] || query.get("key");
+        // Replace path if query parameter is used. This is for backwards compatibility.
+        if (key && !pathComponents[0]) {
+          window.history.replaceState({}, "", `/${key}`);
+        }
         if (!key) {
           error = {
             status: 404,
             title: "Question not found",
+          };
+          return;
+        }
+
+        view = pathComponents[1] || "form";
+        if (["form", "summary"].includes(view) === false) {
+          error = {
+            status: 404,
+            title: "Page not found",
           };
           return;
         }
@@ -53,13 +70,22 @@
         }
         question = qr.data;
 
-        // Initialize the answer.
-        const ar = await createAnswer(key);
-        if (ar.error) {
-          error = ar.error;
-          return;
+        // Initialize new answer or get existings answer.
+        const id = query.get("id");
+        if (view === "form") {
+            const ar = id ? await getAnswer(id) : await createAnswer(key);
+          if (ar.error) {
+            error = ar.error;
+            return;
+          }
+          answer = ar.data;
+          window.history.replaceState({}, "", `/${key}?id=${answer.id}`);
         }
-        answer = ar.data;
+
+        // Fetch the summary.
+        if (view === "summary") {
+          fetchSummary(key);
+        }
       } catch (err) {
         error = {
           status: 500,
@@ -70,6 +96,10 @@
       }
     };
 
+    window.addEventListener("popstate", (event) => {
+      initAnswer();
+    });
+
     initAnswer();
   });
 
@@ -79,7 +109,7 @@
     }
 
     try {
-      const ar = await updateAnswer(answer?.key, answer?.id, payload);
+      const ar = await updateAnswer(answer?.id, payload);
       if (ar.error) {
         error = ar.error;
         return;
@@ -93,11 +123,10 @@
     }
   };
 
-  const handleSubmit = async () => {
+  const fetchSummary = async (key?: string) => {
     loading = true;
-    await handleChange({ submit: true });
     try {
-      const sr = await getSummary(answer?.key ?? "");
+      const sr = await getSummary(key ?? "");
       if (sr.error) {
         error = sr.error;
         return;
@@ -112,6 +141,15 @@
       loading = false;
     }
   };
+
+  const handleSubmit = async () => {
+    loading = true;
+    await handleChange({ submit: true });
+    view = "summary";
+    window.history.pushState({id: answer?.id}, "", `/${answer?.key}/summary`);
+    await fetchSummary(answer?.key);
+    loading = false;
+  };
 </script>
 
 <header>
@@ -125,7 +163,7 @@
     <Loading />
   {:else if error}
     <Error {error} />
-  {:else if question && !answer?.submitted_at}
+  {:else if question && view === "form"}
     <fieldset>
       <legend>{question.choice_text}</legend>
       <RadioGroup
@@ -145,7 +183,7 @@
       {/if}
       <Submit onSubmit={handleSubmit} />
     {/if}
-  {:else if question && answer?.submitted_at && summary}
+  {:else if question && view === "summary" && summary}
     <div class="summary">
       <p>Thank you for your feedback!</p>
       <BarChart choices={question.choices} {summary} />
