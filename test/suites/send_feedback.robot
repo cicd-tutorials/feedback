@@ -10,7 +10,7 @@ ${URL}              %{BASE_URL}
 
 *** Test cases ***
 Open feedback form
-    New Page  ${URL}?key=thumbs
+    New Page  ${URL}/thumbs
     Wait For Elements State  text=How are you feeling?  timeout=1 minute
 
 Send positive feedback
@@ -21,13 +21,13 @@ Check feedback was recorded
     Get value count  Thumbs up  1
 
 Send another positive feedback and check summary
-    Reload
+    New Page  ${URL}/thumbs
     Click  text=👍
     Click  text=Submit
     Get value count  Thumbs up  2
 
 Send negative feedback and check summary
-    Reload
+    New Page  ${URL}/thumbs
     Click  text=👎
     Click  text=Submit
     Get value count  Thumbs down  1

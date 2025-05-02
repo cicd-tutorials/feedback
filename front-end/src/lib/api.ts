@@ -68,6 +68,11 @@ export const getQuestion = async (
   return buildResponse<Question>(response);
 };
 
+export const getAnswer = async (id: string): Promise<APIResponse<Answer>> => {
+  const response = await fetch(`${baseUrl()}/answer/${id}`);
+  return buildResponse<Answer>(response);
+};
+
 export const createAnswer = async (
   key: string,
 ): Promise<APIResponse<Answer>> => {
@@ -82,7 +87,6 @@ export const createAnswer = async (
 };
 
 export const updateAnswer = async (
-  key: string,
   id: string,
   payload: UpdateAnswerPayload,
 ): Promise<APIResponse<Answer>> => {
