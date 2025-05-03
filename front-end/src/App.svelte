@@ -22,6 +22,7 @@
   import Comment from "./lib/Comment.svelte";
   import BarChart from "./lib/BarChart.svelte";
   import Footer from "./lib/Footer.svelte";
+  import Share from "./views/Share.svelte";
 
   let loading = $state(true);
   let view = $state<string>("form");
@@ -54,7 +55,7 @@
         }
 
         view = pathComponents[1] || "form";
-        if (["form", "summary"].includes(view) === false) {
+        if (["form", "share", "summary"].includes(view) === false) {
           error = {
             status: 404,
             title: "Page not found",
@@ -73,7 +74,7 @@
         // Initialize new answer or get existings answer.
         const id = query.get("id");
         if (view === "form") {
-            const ar = id ? await getAnswer(id) : await createAnswer(key);
+          const ar = id ? await getAnswer(id) : await createAnswer(key);
           if (ar.error) {
             error = ar.error;
             return;
@@ -146,7 +147,7 @@
     loading = true;
     await handleChange({ submit: true });
     view = "summary";
-    window.history.pushState({id: answer?.id}, "", `/${answer?.key}/summary`);
+    window.history.pushState({ id: answer?.id }, "", `/${answer?.key}/summary`);
     await fetchSummary(answer?.key);
     loading = false;
   };
@@ -188,6 +189,8 @@
       <p>Thank you for your feedback!</p>
       <BarChart choices={question.choices} {summary} />
     </div>
+  {:else if question && view === "share"}
+    <Share {question} />
   {/if}
 </main>
 <Footer />
