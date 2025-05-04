@@ -5,6 +5,26 @@ This is an example application for:
 - Learning basics of how modern web applications are built with HTML, CSS, JavaScript, servers, and databases.
 - Deploying something a little more advanced than a _Hello world!_ page or unconfigured nginx server.
 
+## Running the application
+
+To run the application on your machine, you will need [Docker Compose](https://docs.docker.com/compose/). You can either install it manually or by using Docker Desktop (see also [Installing Docker](https://cicd-tutorials.net/#installing-docker)).
+
+To start the application, run `docker compose up -d`. This will build the container images and start the containers in the background. The application should be soon available in [http://localhost:8080](http://localhost:8080). The API container will create two demo forms, which are available in [/thumbs](http://localhost:8080/thumbs) and [/weather](http://localhost:8080/weather) paths.
+
+```sh
+docker compose up -d
+```
+
+If you want to inspect the admin panel, print out the content of `/var/feedback/initial_admin_password` in the `api` container with `docker compose exec` for the initial admin account password. Admin panel is available in [http://localhost:8080/admin](http://localhost:8080/admin) and the username for the admin account is `admin`.
+
+```sh
+docker compose exec api cat /var/feedback/initial_admin_password
+```
+
+For a more production like deployment, there is an OpenTofu/Terraform configuration example in [iac/tf](./iac/tf/) directory.
+
+<!-- TODO: configuration -->
+
 ## Three-tier architecture
 
 The application is built using a three-tier architecture. I.e., the application consists of presentation tier, application tier and a data tier.
