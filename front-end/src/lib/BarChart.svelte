@@ -21,10 +21,6 @@
 </div>
 
 <style>
-  .bar-chart {
-    margin: 2rem 0;
-  }
-
   .row {
     display: flex;
     align-items: center;

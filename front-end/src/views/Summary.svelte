@@ -3,7 +3,7 @@
 
   import { getSummary, type Question, type Summary } from "../lib/api";
   import BarChart from "../lib/BarChart.svelte";
-  import { setError, setLoading } from "../lib/status.svelte";
+  import { getStatus, setError, setLoading } from "../lib/status.svelte";
 
   interface Props {
     question: Question;
@@ -12,6 +12,7 @@
   let { question }: Props = $props();
 
   let summary = $state<Summary | null>(null);
+  let { loading, error } = $derived.by(getStatus);
 
   const fetchSummary = async (key?: string) => {
     if (summary === null) {
@@ -49,9 +50,13 @@
   });
 </script>
 
-{#if summary}
-  <div class="summary">
-    <p>Thank you for your feedback!</p>
-    <BarChart choices={question.choices} {summary} />
-  </div>
+{#if !loading && !error && summary}
+  <p>Thank you for your feedback!</p>
+  <BarChart choices={question.choices} {summary} />
 {/if}
+
+<style>
+  p {
+    margin: 1rem 0 2rem;
+  }
+</style>

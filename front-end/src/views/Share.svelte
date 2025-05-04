@@ -27,10 +27,8 @@
   });
 </script>
 
-<div class="share">
-  <p>{question.choice_text} Scan the QR code to open the feedback form.</p>
-  <canvas id="qrcode"></canvas>
-</div>
+<p>{question.choice_text} Scan the QR code to open the feedback form.</p>
+<canvas id="qrcode"></canvas>
 
 <style>
   canvas {

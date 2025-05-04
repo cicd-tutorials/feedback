@@ -18,7 +18,6 @@
     color: var(--color-fg);
     font-weight: 500;
     letter-spacing: 0.5px;
-    margin: 2rem 0;
     padding: 0.5rem 1rem;
 
     transition:

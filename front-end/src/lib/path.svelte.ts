@@ -6,8 +6,12 @@ export interface QuestionPath {
 
 let path = $state<string>("");
 
-export const initializePath = () => {
+export const updatePath = () => {
   path = window.location.pathname;
+}
+
+export const initializePath = () => {
+  updatePath();
   const { key } = parsePath();
 
   // Replace path if key is given as query parameter instead of path parameter. This is for backwards compatibility.

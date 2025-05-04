@@ -2,51 +2,39 @@
   import { onMount } from "svelte";
 
   import logo from "/logo.svg";
-  import RadioGroup from "./lib/RadioGroup.svelte";
   import {
-    createAnswer,
-    getAnswer,
     getQuestion,
-    updateAnswer,
     waitUntilLive,
-    type Answer,
     type Question,
-    type UpdateAnswerPayload,
   } from "./lib/api";
   import Loading from "./lib/Loading.svelte";
   import Error from "./lib/Error.svelte";
-  import Submit from "./lib/Submit.svelte";
-  import Comment from "./lib/Comment.svelte";
   import Footer from "./lib/Footer.svelte";
   import Share from "./views/Share.svelte";
-  import { initializePath, navigate, parsePath } from "./lib/path.svelte";
+  import {
+    initializePath,
+    parsePath,
+    updatePath,
+  } from "./lib/path.svelte";
   import Link from "./lib/Link.svelte";
   import { getStatus, setError, setLoading } from "./lib/status.svelte";
   import Summary from "./views/Summary.svelte";
+  import Form from "./views/Form.svelte";
 
   let { loading, error } = $derived.by(getStatus);
   let view = $derived.by(() => parsePath().view);
   let question = $state<Question | null>(null);
-  let answer = $state<Answer | null>(null);
 
-  const initAnswer = async () => {
+  const initializeQuestion = async () => {
     try {
       // Wait until the server has started.
       await waitUntilLive();
 
-      const { key, view, id } = parsePath();
+      const { key } = parsePath();
       if (!key) {
         setError({
           status: 404,
           title: "Question not found",
-        });
-        return;
-      }
-
-      if (["form", "share", "summary"].includes(view) === false) {
-        setError({
-          status: 404,
-          title: "Page not found",
         });
         return;
       }
@@ -58,21 +46,10 @@
         return;
       }
       question = qr.data;
-
-      // Initialize new answer or get existings answer.
-      if (view === "form") {
-        const ar = id ? await getAnswer(id) : await createAnswer(key);
-        if (ar.error) {
-          setError(ar.error);
-          return;
-        }
-        answer = ar.data;
-        navigate(`/${key}?id=${answer.id}`, true);
-      }
     } catch (err) {
       setError({
         status: 500,
-        title: "Failed to initialize feedback form.",
+        title: "Failed to initialize feedback application.",
       });
     } finally {
       setLoading(false);
@@ -81,47 +58,22 @@
 
   onMount(() => {
     initializePath();
+    initializeQuestion();
 
     window.addEventListener("popstate", () => {
-      initAnswer();
+      updatePath();
     });
-
-    initAnswer();
   });
 
   $effect(() => {
-    if (view === "form" && answer === null) {
-      initAnswer();
-    }
-  });
-
-  const handleChange = async (payload: UpdateAnswerPayload) => {
-    if (!answer) {
+    if (["form", "share", "summary"].includes(view) === false) {
+      setError({
+        status: 404,
+        title: "Page not found",
+      });
       return;
     }
-
-    try {
-      const ar = await updateAnswer(answer?.id, payload);
-      if (ar.error) {
-        setError(ar.error);
-        return;
-      }
-      answer = ar.data;
-    } catch (_) {
-      setError({
-        status: 500,
-        title: "Failed to update feedback.",
-      });
-    }
-  };
-
-  const handleSubmit = async () => {
-    setLoading(true);
-    await handleChange({ submit: true });
-    navigate(`/${answer?.key}/summary`);
-    answer = null;
-    setLoading(false);
-  };
+  });
 </script>
 
 <header>
@@ -135,28 +87,10 @@
     <Loading />
   {:else if error}
     <Error {error} />
-  {:else if question && view === "form"}
-    <fieldset>
-      <legend>{question.choice_text}</legend>
-      <RadioGroup
-        items={question.choices}
-        name={question.type}
-        onChange={(value) => handleChange({ value })}
-        value={answer?.value}
-      />
-    </fieldset>
-    {#if answer?.value != undefined}
-      {#if question?.with_comment}
-        <Comment
-          label={question?.comment_text}
-          onChange={(comment) => handleChange({ comment })}
-          value={answer?.comment}
-        />
-      {/if}
-      <Submit onSubmit={handleSubmit} />
-    {/if}
   {/if}
-  {#if question && view === "summary"}
+  {#if question && view === "form"}
+    <Form {question} />
+  {:else if question && view === "summary"}
     <Summary {question} />
   {:else if question && view === "share"}
     <Share {question} />
@@ -210,20 +144,8 @@
     flex: 1;
   }
 
-  fieldset {
-    appearance: none;
-    border: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  legend {
-    appearance: none;
-    margin: 1rem 0;
-    padding: 0;
-  }
-
   .links {
+    color: var(--color-secondary);
     display: flex;
     gap: 1rem;
     margin: 3rem 0 2rem;
