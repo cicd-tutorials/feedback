@@ -140,6 +140,7 @@
 
   main {
     flex: 1;
+    padding-bottom: 2rem;
   }
 
   .links {
