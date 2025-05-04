@@ -1,6 +1,8 @@
 # Contributing
 
-## Formatting python code
+## Formatting
+
+### Python
 
 This repository uses [autopep8](https://pypi.org/project/autopep8/) to format Python code with its default settings.
 
@@ -20,7 +22,7 @@ Check formatting by running:
 pycodestyle --exclude back-end/server/settings.py,*/migrations/*.py .
 ```
 
-## Formatting TF configuration
+### TF
 
 This repository uses `tofu fmt` to format `.tf` configuration files.
 
@@ -36,7 +38,7 @@ Check formatting by running:
 tofu fmt -check -recursive
 ```
 
-## Formatting other code
+### Other code
 
 This repository uses [Prettier](https://prettier.io/) to format code with its default settings.
 
