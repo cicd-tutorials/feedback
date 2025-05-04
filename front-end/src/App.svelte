@@ -25,8 +25,9 @@
       const { key } = parsePath();
       if (!key) {
         setError({
-          status: 404,
-          title: "Question not found",
+          status: 400,
+          title:
+            "Question key is missing. Please ask for a valid link to the feedback form.",
         });
         return;
       }
@@ -80,14 +81,15 @@
   {:else if error}
     <Error {error} />
   {/if}
-  {#if question && view === "form"}
-    <Form {question} />
-  {:else if question && view === "summary"}
-    <Summary {question} />
-  {:else if question && view === "share"}
-    <Share {question} />
-  {/if}
+
   {#if question}
+    {#if view === "form"}
+      <Form {question} />
+    {:else if view === "summary"}
+      <Summary {question} />
+    {:else if view === "share"}
+      <Share {question} />
+    {/if}
     <div class="links">
       {#if view !== "form"}
         <Link target={`/${question.key}`}>Submit an answer</Link>
