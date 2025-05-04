@@ -23,7 +23,7 @@
         light,
       },
       margin: 0,
-      width: 16 * rem,
+      width: 12 * rem,
     });
   });
 </script>
