@@ -5,7 +5,7 @@ This is an example application for:
 - Learning basics of how modern web applications are built with HTML, CSS, JavaScript, servers, and databases.
 - Deploying something a little more advanced than a _Hello world!_ page or unconfigured nginx server.
 
-## Running the application
+## Getting started
 
 To run the application on your machine, you will need [Docker Compose](https://docs.docker.com/compose/). You can either install it manually or by using Docker Desktop (see also [Installing Docker](https://cicd-tutorials.net/#installing-docker)).
 
