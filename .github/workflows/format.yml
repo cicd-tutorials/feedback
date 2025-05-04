@@ -14,8 +14,8 @@ jobs:
           node-version: "18"
       - name: Check formatting
         run: |
-          npm i -g prettier
-          prettier . --check
+          npm ci
+          npm run format:check
   pycodestyle:
     runs-on: ubuntu-latest
     steps:
