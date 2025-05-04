@@ -27,4 +27,4 @@ export const fetchSummary = async (key?: string) => {
 
 export const getSummary = () => {
   return summary;
-}
+};

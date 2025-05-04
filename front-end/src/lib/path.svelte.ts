@@ -8,7 +8,7 @@ let path = $state<string>("");
 
 export const updatePath = () => {
   path = window.location.pathname;
-}
+};
 
 export const initializePath = () => {
   updatePath();
@@ -20,7 +20,7 @@ export const initializePath = () => {
   if (queryKey && !key) {
     navigate(`/${queryKey}`, true);
   }
-}
+};
 
 export const parsePath = (): QuestionPath => {
   const pathComponents = path.split("/").slice(1);
@@ -31,7 +31,7 @@ export const parsePath = (): QuestionPath => {
   const id = query.get("id") ?? undefined;
 
   return { key, view, id };
-}
+};
 
 export const navigate = (next: string, replace = false) => {
   if (replace) {
@@ -40,4 +40,4 @@ export const navigate = (next: string, replace = false) => {
     window.history.pushState({}, "", next);
   }
   path = next;
-}
+};
