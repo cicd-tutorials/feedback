@@ -13,8 +13,12 @@
   {#each choices as choice}
     <div class="row" title={choice.title}>
       <span>{choice.label}</span>
-      <div class="bar" style="width: {summary.values[String(choice.value)] / summary.count_non_null * 100}%"
-        ></div>
+      <div
+        class="bar"
+        style="width: {(summary.values[String(choice.value)] /
+          summary.count_non_null) *
+          100}%"
+      ></div>
       <span>{summary.values[String(choice.value)]}</span>
     </div>
   {/each}

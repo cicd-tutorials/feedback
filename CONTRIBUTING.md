@@ -40,18 +40,18 @@ tofu fmt -check -recursive
 
 This repository uses [Prettier](https://prettier.io/) to format code with its default settings.
 
-To install Prettier, ensure you have Nodejs and npm installed and run `sudo npm i -g prettier`. This install prettier globally to your system.
+To install Prettier, ensure you have Nodejs and npm installed and run `npm ci`. This installs prettier to `node_modules` in this directory.
 
 Format code by running:
 
 ```sh
-prettier . --write
+npm run format
 ```
 
 Check formatting by running:
 
 ```sh
-prettier . --check
+npm run format:check
 ```
 
 ## Run acceptance tests
