@@ -7,31 +7,27 @@
     createAnswer,
     getAnswer,
     getQuestion,
-    getSummary,
     updateAnswer,
     waitUntilLive,
     type Answer,
-    type Problem,
     type Question,
-    type Summary,
     type UpdateAnswerPayload,
   } from "./lib/api";
   import Loading from "./lib/Loading.svelte";
   import Error from "./lib/Error.svelte";
   import Submit from "./lib/Submit.svelte";
   import Comment from "./lib/Comment.svelte";
-  import BarChart from "./lib/BarChart.svelte";
   import Footer from "./lib/Footer.svelte";
   import Share from "./views/Share.svelte";
   import { initializePath, navigate, parsePath } from "./lib/path.svelte";
   import Link from "./lib/Link.svelte";
+  import { getStatus, setError, setLoading } from "./lib/status.svelte";
+  import Summary from "./views/Summary.svelte";
 
-  let loading = $state(true);
+  let { loading, error } = $derived.by(getStatus);
   let view = $derived.by(() => parsePath().view);
-  let error = $state<Problem | null>(null);
   let question = $state<Question | null>(null);
   let answer = $state<Answer | null>(null);
-  let summary = $state<Summary | null>(null);
 
   const initAnswer = async () => {
     try {
@@ -40,25 +36,25 @@
 
       const { key, view, id } = parsePath();
       if (!key) {
-        error = {
+        setError({
           status: 404,
           title: "Question not found",
-        };
+        });
         return;
       }
 
       if (["form", "share", "summary"].includes(view) === false) {
-        error = {
+        setError({
           status: 404,
           title: "Page not found",
-        };
+        });
         return;
       }
 
       // Fetch the question using the key.
       const qr = await getQuestion(key);
       if (qr.error) {
-        error = qr.error;
+        setError(qr.error);
         return;
       }
       question = qr.data;
@@ -67,24 +63,19 @@
       if (view === "form") {
         const ar = id ? await getAnswer(id) : await createAnswer(key);
         if (ar.error) {
-          error = ar.error;
+          setError(ar.error);
           return;
         }
         answer = ar.data;
         navigate(`/${key}?id=${answer.id}`, true);
       }
-
-      // Fetch the summary.
-      if (view === "summary") {
-        fetchSummary(key);
-      }
     } catch (err) {
-      error = {
+      setError({
         status: 500,
         title: "Failed to initialize feedback form.",
-      };
+      });
     } finally {
-      loading = false;
+      setLoading(false);
     }
   };
 
@@ -112,44 +103,24 @@
     try {
       const ar = await updateAnswer(answer?.id, payload);
       if (ar.error) {
-        error = ar.error;
+        setError(ar.error);
         return;
       }
       answer = ar.data;
     } catch (_) {
-      error = {
+      setError({
         status: 500,
         title: "Failed to update feedback.",
-      };
-    }
-  };
-
-  const fetchSummary = async (key?: string) => {
-    loading = true;
-    try {
-      const sr = await getSummary(key ?? "");
-      if (sr.error) {
-        error = sr.error;
-        return;
-      }
-      summary = sr.data;
-    } catch (_) {
-      error = {
-        status: 500,
-        title: "Failed to fetch summary.",
-      };
-    } finally {
-      loading = false;
+      });
     }
   };
 
   const handleSubmit = async () => {
-    loading = true;
+    setLoading(true);
     await handleChange({ submit: true });
     navigate(`/${answer?.key}/summary`);
-    await fetchSummary(answer?.key);
     answer = null;
-    loading = false;
+    setLoading(false);
   };
 </script>
 
@@ -184,11 +155,9 @@
       {/if}
       <Submit onSubmit={handleSubmit} />
     {/if}
-  {:else if question && view === "summary" && summary}
-    <div class="summary">
-      <p>Thank you for your feedback!</p>
-      <BarChart choices={question.choices} {summary} />
-    </div>
+  {/if}
+  {#if question && view === "summary"}
+    <Summary {question} />
   {:else if question && view === "share"}
     <Share {question} />
   {/if}
@@ -257,7 +226,7 @@
   .links {
     display: flex;
     gap: 1rem;
-    margin: 2rem 0;
+    margin: 3rem 0 2rem;
     /* Disable margins from collapsing */
     padding-top: 0.05px;
   }
