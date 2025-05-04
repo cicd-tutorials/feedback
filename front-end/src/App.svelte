@@ -2,20 +2,12 @@
   import { onMount } from "svelte";
 
   import logo from "/logo.svg";
-  import {
-    getQuestion,
-    waitUntilLive,
-    type Question,
-  } from "./lib/api";
+  import { getQuestion, waitUntilLive, type Question } from "./lib/api";
   import Loading from "./lib/Loading.svelte";
   import Error from "./lib/Error.svelte";
   import Footer from "./lib/Footer.svelte";
   import Share from "./views/Share.svelte";
-  import {
-    initializePath,
-    parsePath,
-    updatePath,
-  } from "./lib/path.svelte";
+  import { initializePath, parsePath, updatePath } from "./lib/path.svelte";
   import Link from "./lib/Link.svelte";
   import { getStatus, setError, setLoading } from "./lib/status.svelte";
   import Summary from "./views/Summary.svelte";
@@ -104,7 +96,11 @@
         <Link target={`/${question.key}/share`}>Share the URL</Link>
       {/if}
       {#if view !== "summary"}
-        <Link target={`/${question.key}/summary`}>View answer summary</Link>
+        {#if view === "share"}
+          <Link target={`/${question.key}/summary`}>Hide the QR code</Link>
+        {:else}
+          <Link target={`/${question.key}/summary`}>View answer summary</Link>
+        {/if}
       {/if}
     </div>
   {/if}

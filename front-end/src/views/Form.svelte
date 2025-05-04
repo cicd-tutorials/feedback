@@ -82,7 +82,7 @@
     await handleChange({ submit: true });
     navigate(`/${answer?.key}/summary`);
     answer = null;
-    setLoading(false);
+    // Summary view will set loading to false after updating the summary.
   };
 </script>
 
