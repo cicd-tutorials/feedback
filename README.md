@@ -29,15 +29,49 @@ For a more production like deployment, there is an OpenTofu/Terraform configurat
 
 The application is built using a three-tier architecture. I.e., the application consists of presentation tier, application tier and a data tier.
 
+```mermaid
+flowchart LR
+  subgraph d [Data tier]
+    db["Database<br>_(Postgres)_"]
+  end
+  subgraph a ["Application tier<br>_(Django application)_"]
+    a_whitespace:::hidden
+    admin[Admin interface]
+    API
+    static_build[Static files]
+  end
+  subgraph p ["Presentation tier<br>_(Nginx server)_"]
+    p_whitespace:::hidden
+    root["/ _(Svelte application)_"]
+    api_proxy["/api"]
+    admin_proxy["/admin"]
+    static["/static"]
+  end
+
+  Browser-->root
+  Browser-->admin_proxy
+  Browser-.->api_proxy
+  Browser-.->static
+
+  admin_proxy-->admin
+  api_proxy-->API
+  static -.- static_build
+
+  admin-->db
+  API-->db
+
+  classDef hidden display: none;
+```
+
 <!-- TODO: paragraph or two on how these are executed with docker compose -->
 
 ### Presentation tier
 
 <!-- TODO: Intro to presentation tier -->
 
-The presentation tier of the application is implemented as Svelte application in [front-end](./front-end) directory. [Svelte](https://svelte.dev/) is a JavaScript user-interface (UI) framework used to build the HTML, JavaScript, and CSS files that the browser renders and runs on the users machine.
+The end-user facing user interface (UI) of the application is implemented as Svelte application in [front-end](./front-end) directory. [Svelte](https://svelte.dev/) is a JavaScript user-interface (UI) framework used to build the HTML, JavaScript, and CSS files that the browser renders and runs on the users machine.
 
-<!-- TODO: paragraph about how nginx is used to serve these files -->
+The HTML, JavaScript, and CSS files that implement the user UI are delivered to the end-users browser by an static file server. This application uses [nginx](https://nginx.org/) which, in addition to hosting the static files, acts as a reverse proxy towards the application layer: when the user interacts with the application, the browser contacts the presentation tier which then proxies the requests to application tier. <!-- TODO: add note on preventing direct access to the application server -->
 
 ### Application tier
 
