@@ -2,6 +2,7 @@
   import QRCode from "qrcode";
 
   import type { Question } from "../lib/api";
+  import Summary from "./Summary.svelte";
 
   interface Props {
     question: Question;
@@ -27,13 +28,18 @@
   });
 </script>
 
-<div class="share">
-  <p>{question.choice_text} Scan the QR code to open the feedback form.</p>
-  <canvas id="qrcode"></canvas>
-</div>
+<Summary {question} />
+<div class="divider"></div>
+<p>Scan the QR code to open the feedback form.</p>
+<canvas id="qrcode"></canvas>
 
 <style>
+  .divider {
+    border: 1px solid var(--color-border);
+    margin: 3rem 0 2rem;
+  }
+
   canvas {
-    margin: 2rem 0;
+    margin: 2rem 0 0;
   }
 </style>

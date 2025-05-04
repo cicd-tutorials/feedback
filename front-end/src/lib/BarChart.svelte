@@ -21,10 +21,6 @@
 </div>
 
 <style>
-  .bar-chart {
-    margin: 2rem 0;
-  }
-
   .row {
     display: flex;
     align-items: center;
@@ -37,5 +33,7 @@
     border-radius: var(--border-radius);
     height: 0.5rem;
     min-width: 1rem;
+
+    transition: width 0.2s ease-in-out;
   }
 </style>

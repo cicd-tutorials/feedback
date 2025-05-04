@@ -2,155 +2,70 @@
   import { onMount } from "svelte";
 
   import logo from "/logo.svg";
-  import RadioGroup from "./lib/RadioGroup.svelte";
-  import {
-    createAnswer,
-    getAnswer,
-    getQuestion,
-    getSummary,
-    updateAnswer,
-    waitUntilLive,
-    type Answer,
-    type Problem,
-    type Question,
-    type Summary,
-    type UpdateAnswerPayload,
-  } from "./lib/api";
+  import { getQuestion, waitUntilLive, type Question } from "./lib/api";
   import Loading from "./lib/Loading.svelte";
   import Error from "./lib/Error.svelte";
-  import Submit from "./lib/Submit.svelte";
-  import Comment from "./lib/Comment.svelte";
-  import BarChart from "./lib/BarChart.svelte";
   import Footer from "./lib/Footer.svelte";
   import Share from "./views/Share.svelte";
+  import { initializePath, parsePath, updatePath } from "./lib/path.svelte";
+  import Link from "./lib/Link.svelte";
+  import { getStatus, setError, setLoading } from "./lib/status.svelte";
+  import Summary from "./views/Summary.svelte";
+  import Form from "./views/Form.svelte";
 
-  let loading = $state(true);
-  let view = $state<string>("form");
-  let error = $state<Problem | null>(null);
+  let { loading, error } = $derived.by(getStatus);
+  let view = $derived.by(() => parsePath().view);
   let question = $state<Question | null>(null);
-  let answer = $state<Answer | null>(null);
-  let summary = $state<Summary | null>(null);
+
+  const initializeQuestion = async () => {
+    try {
+      // Wait until the server has started.
+      await waitUntilLive();
+
+      const { key } = parsePath();
+      if (!key) {
+        setError({
+          status: 404,
+          title: "Question not found",
+        });
+        return;
+      }
+
+      // Fetch the question using the key.
+      const qr = await getQuestion(key);
+      if (qr.error) {
+        setError(qr.error);
+        return;
+      }
+      question = qr.data;
+    } catch (err) {
+      setError({
+        status: 500,
+        title: "Failed to initialize feedback application.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   onMount(() => {
-    const initAnswer = async () => {
-      try {
-        // Wait until the server has started.
-        await waitUntilLive();
+    initializePath();
+    initializeQuestion();
 
-        // Parse the question key from URL path or URL query parameters.
-        const pathComponents = window.location.pathname.split("/").slice(1);
-        const query = new URLSearchParams(window.location.search);
-
-        const key = pathComponents[0] || query.get("key");
-        // Replace path if query parameter is used. This is for backwards compatibility.
-        if (key && !pathComponents[0]) {
-          window.history.replaceState({}, "", `/${key}`);
-        }
-        if (!key) {
-          error = {
-            status: 404,
-            title: "Question not found",
-          };
-          return;
-        }
-
-        view = pathComponents[1] || "form";
-        if (["form", "share", "summary"].includes(view) === false) {
-          error = {
-            status: 404,
-            title: "Page not found",
-          };
-          return;
-        }
-
-        // Fetch the question using the key.
-        const qr = await getQuestion(key);
-        if (qr.error) {
-          error = qr.error;
-          return;
-        }
-        question = qr.data;
-
-        // Initialize new answer or get existings answer.
-        const id = query.get("id");
-        if (view === "form") {
-          const ar = id ? await getAnswer(id) : await createAnswer(key);
-          if (ar.error) {
-            error = ar.error;
-            return;
-          }
-          answer = ar.data;
-          window.history.replaceState({}, "", `/${key}?id=${answer.id}`);
-        }
-
-        // Fetch the summary.
-        if (view === "summary") {
-          fetchSummary(key);
-        }
-      } catch (err) {
-        error = {
-          status: 500,
-          title: "Failed to initialize feedback form.",
-        };
-      } finally {
-        loading = false;
-      }
-    };
-
-    window.addEventListener("popstate", (event) => {
-      initAnswer();
+    window.addEventListener("popstate", () => {
+      updatePath();
     });
-
-    initAnswer();
   });
 
-  const handleChange = async (payload: UpdateAnswerPayload) => {
-    if (!answer) {
+  $effect(() => {
+    if (["form", "share", "summary"].includes(view) === false) {
+      setError({
+        status: 404,
+        title: "Page not found",
+      });
       return;
     }
-
-    try {
-      const ar = await updateAnswer(answer?.id, payload);
-      if (ar.error) {
-        error = ar.error;
-        return;
-      }
-      answer = ar.data;
-    } catch (_) {
-      error = {
-        status: 500,
-        title: "Failed to update feedback.",
-      };
-    }
-  };
-
-  const fetchSummary = async (key?: string) => {
-    loading = true;
-    try {
-      const sr = await getSummary(key ?? "");
-      if (sr.error) {
-        error = sr.error;
-        return;
-      }
-      summary = sr.data;
-    } catch (_) {
-      error = {
-        status: 500,
-        title: "Failed to fetch summary.",
-      };
-    } finally {
-      loading = false;
-    }
-  };
-
-  const handleSubmit = async () => {
-    loading = true;
-    await handleChange({ submit: true });
-    view = "summary";
-    window.history.pushState({ id: answer?.id }, "", `/${answer?.key}/summary`);
-    await fetchSummary(answer?.key);
-    loading = false;
-  };
+  });
 </script>
 
 <header>
@@ -164,33 +79,30 @@
     <Loading />
   {:else if error}
     <Error {error} />
-  {:else if question && view === "form"}
-    <fieldset>
-      <legend>{question.choice_text}</legend>
-      <RadioGroup
-        items={question.choices}
-        name={question.type}
-        onChange={(value) => handleChange({ value })}
-        value={answer?.value}
-      />
-    </fieldset>
-    {#if answer?.value != undefined}
-      {#if question?.with_comment}
-        <Comment
-          label={question?.comment_text}
-          onChange={(comment) => handleChange({ comment })}
-          value={answer?.comment}
-        />
-      {/if}
-      <Submit onSubmit={handleSubmit} />
-    {/if}
-  {:else if question && view === "summary" && summary}
-    <div class="summary">
-      <p>Thank you for your feedback!</p>
-      <BarChart choices={question.choices} {summary} />
-    </div>
+  {/if}
+  {#if question && view === "form"}
+    <Form {question} />
+  {:else if question && view === "summary"}
+    <Summary {question} />
   {:else if question && view === "share"}
     <Share {question} />
+  {/if}
+  {#if question}
+    <div class="links">
+      {#if view !== "form"}
+        <Link target={`/${question.key}`}>Submit an answer</Link>
+      {/if}
+      {#if view !== "share"}
+        <Link target={`/${question.key}/share`}>Share the URL</Link>
+      {/if}
+      {#if view !== "summary"}
+        {#if view === "share"}
+          <Link target={`/${question.key}/summary`}>Hide the QR code</Link>
+        {:else}
+          <Link target={`/${question.key}/summary`}>View answer summary</Link>
+        {/if}
+      {/if}
+    </div>
   {/if}
 </main>
 <Footer />
@@ -228,16 +140,12 @@
     flex: 1;
   }
 
-  fieldset {
-    appearance: none;
-    border: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  legend {
-    appearance: none;
-    margin: 1rem 0;
-    padding: 0;
+  .links {
+    color: var(--color-secondary);
+    display: flex;
+    gap: 1rem;
+    margin: 3rem 0 2rem;
+    /* Disable margins from collapsing */
+    padding-top: 0.05px;
   }
 </style>
