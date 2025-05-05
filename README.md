@@ -49,8 +49,8 @@ flowchart LR
     static["/static"]
   end
 
-  Browser-->root
-  Browser-->admin_proxy
+  Browser--Static web page-->root
+  Browser--Dynamic web page-->admin_proxy
   Browser-.->api_proxy
   Browser-.->static
 
@@ -82,9 +82,15 @@ The word static in static web page means that the files served to the browser ar
 
 To summarize, the initial page load will be the same for all users, but the page might use client side logic and API calls to add interaction and to personalize the content visible to the user.
 
+<!-- TODO: paragraph about the Svelte app and e.g. client side routing -->
+
 #### Dynamic web pages
 
 Dynamic web pages, on the other hand, are created dynamically by the web server varying on, for example, the user making requesting the page or the status of the server. Thus, the content returned to the browser when loading the page will already be personalized on the server side.
+
+<!-- TODO: paragraph about the Django admin panel -->
+
+Dynamic web pages often also utilize static content, such as stylesheets and images, to make the page load more efficient. The static content is usually served to the end-user by a static file server instead of the application server. In this application, the static filed required by the admin panel are copied to the nginx server during the Docker build process and served to the end-user from under `/static` path of the server.
 
 ### Application tier
 
