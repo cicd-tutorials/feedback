@@ -4,6 +4,7 @@ This is an example application for:
 
 - Learning basics of how modern web applications are built with HTML, CSS, JavaScript, servers, and databases.
 - Deploying something a little more advanced than a _Hello world!_ page or unconfigured nginx server.
+- Deploying a minimal production like application.
 
 ## Getting started
 
@@ -73,7 +74,17 @@ The end-user facing user interface (UI) of the application is implemented as Sve
 
 The HTML, JavaScript, and CSS files that implement the user UI are delivered to the end-users browser by an static file server. This application uses [nginx](https://nginx.org/) which, in addition to hosting the static files, acts as a reverse proxy towards the application layer: when the user interacts with the application, the browser contacts the presentation tier which then proxies the requests to application tier. <!-- TODO: add note on preventing direct access to the application server -->
 
-<!-- TODO: static (Svelte app) vs dynamic (admin panel) web pages -->
+The presentation tier of an web application can be implemented either as a static or a dynamic web page. This application provides example for both of these: the end-user facing application is a static web page and the admin panel is a dynamic web page.
+
+#### Static web pages
+
+The word static in static web page means that the files served to the browser are always the same regardless of the user or status of the server. This does not mean that the web page could not be interactive. Many static web pages include JavaScript logic that can change the content of the page from within the web browser by utilizing, for example, calls to a API of a web application.
+
+To summarize, the initial page load will be the same for all users, but the page might use client side logic and API calls to add interaction and to personalize the content visible to the user.
+
+#### Dynamic web pages
+
+Dynamic web pages, on the other hand, are created dynamically by the web server varying on, for example, the user making requesting the page or the status of the server. Thus, the content returned to the browser when loading the page will already be personalized on the server side.
 
 ### Application tier
 
