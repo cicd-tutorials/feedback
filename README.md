@@ -34,10 +34,10 @@ flowchart LR
   subgraph d [Data tier]
     db["Database<br>_(Postgres)_"]
   end
-  subgraph a ["Application tier<br>_(Django application)_"]
+  subgraph a ["Application tier<br>_(Gunicorn server)_"]
     a_whitespace:::hidden
     admin[Admin interface]
-    API
+    API["API<br>_(Django application)_"]
     static_build[Static files]
   end
   subgraph p ["Presentation tier<br>_(Nginx server)_"]
@@ -53,9 +53,9 @@ flowchart LR
   Browser-.->api_proxy
   Browser-.->static
 
-  admin_proxy-->admin
-  api_proxy-->API
-  static -.- static_build
+  admin_proxy--proxy_pass-->admin
+  api_proxy--proxy_pass-->API
+  static -.docker build.- static_build
 
   admin-->db
   API-->db
@@ -73,13 +73,17 @@ The end-user facing user interface (UI) of the application is implemented as Sve
 
 The HTML, JavaScript, and CSS files that implement the user UI are delivered to the end-users browser by an static file server. This application uses [nginx](https://nginx.org/) which, in addition to hosting the static files, acts as a reverse proxy towards the application layer: when the user interacts with the application, the browser contacts the presentation tier which then proxies the requests to application tier. <!-- TODO: add note on preventing direct access to the application server -->
 
+<!-- TODO: static (Svelte app) vs dynamic (admin panel) web pages -->
+
 ### Application tier
 
 <!-- TODO: Intro to application tier -->
 
 The application tier of the application is implemented with Django in [back-end](./back-end) directory. [Django](https://www.djangoproject.com/) is a Python web framework that could be used to implement both presentation and the application tiers as well as managing the data tier. In this project it implements the application programming interface (API), handles interaction with the database, and provides an administrator panel for managing the data stored in the database.
 
-<!-- TODO: more detailed description of the server and how it is executed and connected to UI and DB -->
+The Django application is exposed using a [Gunicorn](https://gunicorn.org/) server that handles incoming connections using multiple worker threads. I.e., Gunicorn implements a production ready webserver where as the Django application is responsible for implementing the application logic behind the server. Gunicorn server communicates with the Django application using WSGI, a standardized interface for connecting web servers to applications.
+
+<!-- TODO: more detailed description of the DB connection -->
 
 ### Data tier
 
@@ -87,7 +91,7 @@ The application tier of the application is implemented with Django in [back-end]
 
 The data tier of the application is provided by Postgres SQL database.
 
-<!-- TODO: move relevant parts from here to sections above
+<!-- TODO: move relevant parts from here to sections above and/or to README.md files in back-end and front-end directories.
 
 This section describes step-by-step how this application was created. To be able to follow these step-by-step instructions, you will need:
 
