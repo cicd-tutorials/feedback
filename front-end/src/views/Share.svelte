@@ -47,7 +47,7 @@
 <Summary {question} />
 <div class="divider"></div>
 <p>Scan the QR code to open the feedback form.</p>
-<button class="qrcode-container" onclick={copyLink}>
+<button class="qrcode-container" type="button" onclick={copyLink}>
   <canvas id="qrcode" title={url}></canvas>
   <div class="copy-message">
     {#if copied}Link copied!{:else}Click to copy the link.{/if}
