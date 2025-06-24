@@ -4,6 +4,11 @@ provider "kubernetes" {
   ]
 }
 
+variable "namespace" {
+  type    = string
+  default = "feedback"
+}
+
 variable "node_port" {
   type    = number
   default = null
@@ -22,6 +27,7 @@ module "feedback_app" {
   }
 
   dns_service = var.dns_service
+  namespace   = var.namespace
   node_port   = var.node_port
 }
 
