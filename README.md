@@ -106,7 +106,9 @@ The Django application is exposed using a [Gunicorn](https://gunicorn.org/) serv
 
 <!-- TODO: Intro to data tier -->
 
-The data tier of the application is provided by Postgres SQL database.
+The data tier of the application is provided by Postgres SQL database. The application interacts with the database using Object-Relational Mapping (ORM) of the Django web framework.
+
+The database is only exposed to the private network that connects the application containers to each other. This prevents external access to the database.
 
 <!-- TODO: move relevant parts from here to sections above and/or to README.md files in back-end and front-end directories.
 
