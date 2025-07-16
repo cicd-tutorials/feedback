@@ -1,0 +1,32 @@
+name: Front-end
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - front-end/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - front-end/**
+
+jobs:
+  test:
+    name: Test and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: |
+          cd front-end
+          npm ci
+      - name: Build production bundle
+        run: |
+          cd front-end
+          # npm run lint
+          npm test -- --coverage
+          npm run build
